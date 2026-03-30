@@ -4,12 +4,16 @@ import HomeFeed from "@/components/HomeFeed";
 import AssessmentForm from "@/components/AssessmentForm";
 import WorkoutGenerator from "@/components/WorkoutGenerator";
 import NutritionDashboard from "@/components/NutritionDashboard";
+import LangToggle from "@/components/LangToggle";
+import { LangProvider, useLang } from "@/contexts/LangContext";
 
-const Index = () => {
+const AppContent = () => {
   const [page, setPage] = useState("home");
+  const { dir } = useLang();
 
   return (
-    <div className="min-h-screen bg-background max-w-lg mx-auto relative">
+    <div className="min-h-screen bg-background max-w-lg mx-auto relative" dir={dir}>
+      <LangToggle />
       {page === "home" && <HomeFeed />}
       {page === "assessment" && <AssessmentForm onComplete={() => setPage("nutrition")} />}
       {page === "workout" && <WorkoutGenerator />}
@@ -18,5 +22,11 @@ const Index = () => {
     </div>
   );
 };
+
+const Index = () => (
+  <LangProvider>
+    <AppContent />
+  </LangProvider>
+);
 
 export default Index;
