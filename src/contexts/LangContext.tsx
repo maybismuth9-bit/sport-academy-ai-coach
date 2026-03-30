@@ -59,6 +59,14 @@ const translations: Translations = {
   "assess.back": { en: "Back", he: "חזרה" },
   "assess.done.title": { en: "Assessment Complete", he: "ההערכה הושלמה" },
   "assess.done.desc": { en: "Your personalized plan is ready. Check the Nutrition tab!", he: "התוכנית האישית שלך מוכנה. בדקו בלשונית תזונה!" },
+  "assess.planReady": { en: "Your Fuel Plan is Ready!", he: "תוכנית הדלק שלך מוכנה!" },
+  "assess.planReadyDesc": { en: "We've crafted a personalized nutrition & workout plan based on your profile.", he: "יצרנו תוכנית תזונה ואימונים מותאמת אישית על בסיס הפרופיל שלך." },
+  "assess.seePlan": { en: "See My Plan", he: "לתוכנית שלי" },
+  "assess.physicalStats": { en: "Your Physical Stats", he: "הנתונים הגופניים שלך" },
+  "assess.stepGoal": { en: "Goal", he: "מטרה" },
+  "assess.stepStats": { en: "Stats", he: "נתונים" },
+  "assess.stepActivity": { en: "Activity & Injuries", he: "פעילות ופציעות" },
+  "assess.stepDiet": { en: "Diet Preferences", he: "העדפות תזונה" },
   "assess.years": { en: "years", he: "שנים" },
   "assess.kg": { en: "kg", he: 'ק"ג' },
   "assess.cm": { en: "cm", he: 'ס"מ' },
@@ -73,6 +81,9 @@ const translations: Translations = {
   "workout.suggested": { en: "Suggested Workout", he: "אימון מומלץ" },
   "workout.sets": { en: "sets", he: "סטים" },
   "workout.reps": { en: "reps", he: "חזרות" },
+  "workout.scanGym": { en: "Scan My Gym", he: "סרקו את חדר הכושר" },
+  "workout.uploadHint": { en: "Photo of gym equipment or backyard setup", he: "תמונה של ציוד כושר או חצר" },
+  "workout.aiIdentifying": { en: "FuelCore AI is identifying equipment...", he: "FuelCore AI מזהה ציוד..." },
 
   // Nutrition
   "nutrition.title": { en: "NUTRITION", he: "תזונה" },
@@ -89,6 +100,8 @@ const translations: Translations = {
   "nutrition.noData": { en: "Complete the assessment first to see your personalized nutrition plan.", he: "השלימו את ההערכה קודם כדי לראות את תוכנית התזונה האישית שלכם." },
   "nutrition.dailyTargets": { en: "Your Daily Targets", he: "היעדים היומיים שלך" },
   "nutrition.weeklyPlan": { en: "Weekly Plan", he: "תוכנית שבועית" },
+  "nutrition.dailyWorkout": { en: "Daily Workout", he: "אימון יומי" },
+  "nutrition.recovery": { en: "Physio Recovery", he: "שיקום פיזיותרפי" },
 };
 
 interface LangContextType {
