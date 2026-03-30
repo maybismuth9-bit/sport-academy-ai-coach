@@ -39,7 +39,7 @@ const translations: Translations = {
   "assess.goalMuscle": { en: "Muscle Mass", he: "מסת שריר" },
   "assess.goalLoss": { en: "Weight Loss", he: "ירידה במשקל" },
   "assess.goalMaintenance": { en: "Maintenance", he: "שימור" },
-  "assess.activityLevel": { en: "Activity level?", he: "רמת פעילות?" },
+  "assess.activityLevel": { en: "How many times per week do you work out?", he: "כמה פעמים בשבוע את/ה מתאמנ/ת?" },
   "assess.activity1": { en: "1 time per week", he: "פעם בשבוע" },
   "assess.activity2": { en: "2 times per week", he: "פעמיים בשבוע" },
   "assess.activity3": { en: "3 times per week", he: "3 פעמים בשבוע" },
