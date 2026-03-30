@@ -73,8 +73,8 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
     t("assess.allergyNone"),
   ];
 
-  // Steps: 0-3 numeric, 4 goal, 5 activity, 6 allergies, 7 meal frequency, 8 workout days, 9 workout duration, 10 injuries
-  const totalSteps = 11;
+  // Steps: 0-3 numeric, 4 goal, 5 activity, 6 allergies, 7 meal frequency, 8 workout duration, 9 injuries
+  const totalSteps = 10;
   const progress = ((step + 1) / totalSteps) * 100;
 
   const toggleAllergy = (allergy: string) => {
@@ -201,21 +201,6 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
       );
     }
     if (step === 8) {
-      return (
-        <div className="space-y-4">
-          <Label className="text-xl font-semibold text-foreground">{t("assess.workoutDays")}</Label>
-          <div className="grid grid-cols-7 gap-2 mt-4">
-            {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-              <button key={n} onClick={() => setData({ ...data, workoutDays: String(n) })}
-                className={`p-3 rounded-xl text-center text-lg font-bold transition-all duration-300 border ${data.workoutDays === String(n) ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
-      );
-    }
-    if (step === 9) {
       return (
         <div className="space-y-4">
           <Label className="text-xl font-semibold text-foreground">{t("assess.workoutDuration")}</Label>
