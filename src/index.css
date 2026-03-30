@@ -15,7 +15,7 @@
     --popover: 220 18% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 142 72% 50%;
+    --primary: 180 80% 50%;
     --primary-foreground: 220 20% 6%;
 
     --secondary: 220 16% 16%;
@@ -24,30 +24,31 @@
     --muted: 220 14% 14%;
     --muted-foreground: 220 10% 55%;
 
-    --accent: 142 72% 50%;
-    --accent-foreground: 220 20% 6%;
+    --accent: 270 60% 60%;
+    --accent-foreground: 0 0% 95%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 14% 18%;
     --input: 220 14% 18%;
-    --ring: 142 72% 50%;
+    --ring: 180 80% 50%;
 
     --radius: 0.75rem;
 
-    --neon-glow: 0 0 20px hsl(142 72% 50% / 0.4), 0 0 60px hsl(142 72% 50% / 0.15);
-    --neon-glow-strong: 0 0 20px hsl(142 72% 50% / 0.6), 0 0 80px hsl(142 72% 50% / 0.25);
+    --neon-glow: 0 0 20px hsl(180 80% 50% / 0.4), 0 0 60px hsl(180 80% 50% / 0.15);
+    --neon-glow-strong: 0 0 20px hsl(180 80% 50% / 0.6), 0 0 80px hsl(180 80% 50% / 0.25);
+    --violet-glow: 0 0 20px hsl(270 60% 60% / 0.3), 0 0 60px hsl(270 60% 60% / 0.1);
     --card-shadow: 0 4px 30px hsl(0 0% 0% / 0.4);
 
     --sidebar-background: 220 18% 8%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 142 72% 50%;
+    --sidebar-primary: 180 80% 50%;
     --sidebar-primary-foreground: 220 20% 6%;
     --sidebar-accent: 220 16% 16%;
     --sidebar-accent-foreground: 0 0% 90%;
     --sidebar-border: 220 14% 18%;
-    --sidebar-ring: 142 72% 50%;
+    --sidebar-ring: 180 80% 50%;
   }
 }
 
@@ -67,11 +68,15 @@
 
 @layer utilities {
   .neon-text {
-    text-shadow: 0 0 10px hsl(142 72% 50% / 0.6), 0 0 40px hsl(142 72% 50% / 0.2);
+    text-shadow: 0 0 10px hsl(180 80% 50% / 0.6), 0 0 40px hsl(180 80% 50% / 0.2);
   }
 
   .neon-border {
     box-shadow: var(--neon-glow);
+  }
+
+  .violet-text {
+    text-shadow: 0 0 10px hsl(270 60% 60% / 0.6), 0 0 40px hsl(270 60% 60% / 0.2);
   }
 
   .glass-card {
