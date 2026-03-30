@@ -114,16 +114,7 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
 
   const handleBack = () => { if (step > 0) setStep(step - 1); };
 
-  const canProceed = () => {
-    if (step < 4) return data[numericSteps[step].key as keyof AssessmentData] !== "";
-    if (step === 4) return data.goal !== "";
-    if (step === 5) return data.activityLevel !== "";
-    if (step === 6) return data.allergies.length > 0;
-    if (step === 7) return data.mealFrequency !== "";
-    if (step === 8) return data.workoutDays !== "";
-    if (step === 9) return data.workoutDuration !== "";
-    return true; // injuries optional
-  };
+  const canProceed = () => true;
 
   if (generating) {
     return (
