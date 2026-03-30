@@ -203,21 +203,6 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
     if (step === 8) {
       return (
         <div className="space-y-4">
-          <Label className="text-xl font-semibold text-foreground">{t("assess.workoutDays")}</Label>
-          <div className="grid grid-cols-7 gap-2 mt-4">
-            {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-              <button key={n} onClick={() => setData({ ...data, workoutDays: String(n) })}
-                className={`p-3 rounded-xl text-center text-lg font-bold transition-all duration-300 border ${data.workoutDays === String(n) ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
-      );
-    }
-    if (step === 9) {
-      return (
-        <div className="space-y-4">
           <Label className="text-xl font-semibold text-foreground">{t("assess.workoutDuration")}</Label>
           <div className="relative">
             <Input type="number" placeholder="e.g. 60" value={data.workoutDuration}
