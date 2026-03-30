@@ -81,6 +81,9 @@ const translations: Translations = {
   "workout.suggested": { en: "Suggested Workout", he: "אימון מומלץ" },
   "workout.sets": { en: "sets", he: "סטים" },
   "workout.reps": { en: "reps", he: "חזרות" },
+  "workout.scanGym": { en: "Scan My Gym", he: "סרקו את חדר הכושר" },
+  "workout.uploadHint": { en: "Photo of gym equipment or backyard setup", he: "תמונה של ציוד כושר או חצר" },
+  "workout.aiIdentifying": { en: "FuelCore AI is identifying equipment...", he: "FuelCore AI מזהה ציוד..." },
 
   // Nutrition
   "nutrition.title": { en: "NUTRITION", he: "תזונה" },
