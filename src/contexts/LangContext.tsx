@@ -14,8 +14,8 @@ const translations: Translations = {
   "nav.nutrition": { en: "Nutrition", he: "תזונה" },
 
   // Home
-  "home.title": { en: "SPORT ACADEMY", he: "SPORT ACADEMY" },
-  "home.subtitle": { en: "Your daily fitness & nutrition feed", he: "הפיד היומי שלך לכושר ותזונה" },
+  "home.title": { en: "FUELCORE", he: "FUELCORE" },
+  "home.subtitle": { en: "Your AI-powered fitness & nutrition feed", he: "הפיד שלך לכושר ותזונה מבוסס AI" },
   "home.latest": { en: "Latest Articles", he: "מאמרים אחרונים" },
   "home.article1.title": { en: "5 Compound Movements That Build Real Strength", he: "5 תרגילים מורכבים שבונים כוח אמיתי" },
   "home.article1.summary": { en: "Master the deadlift, squat, bench press, overhead press and barbell row for maximum muscle activation.", he: "שלטו בדדליפט, סקוואט, לחיצת חזה, לחיצת כתפיים ושורה עם מוט למקסימום הפעלת שרירים." },
@@ -38,9 +38,23 @@ const translations: Translations = {
   "assess.goal": { en: "What's your training goal?", he: "מה מטרת האימון שלך?" },
   "assess.goalMuscle": { en: "Muscle Mass", he: "מסת שריר" },
   "assess.goalLoss": { en: "Weight Loss", he: "ירידה במשקל" },
+  "assess.goalMaintenance": { en: "Maintenance", he: "שימור" },
+  "assess.activityLevel": { en: "Activity level?", he: "רמת פעילות?" },
+  "assess.activity1": { en: "Sedentary", he: "יושבני" },
+  "assess.activity2": { en: "Lightly Active", he: "פעילות קלה" },
+  "assess.activity3": { en: "Moderately Active", he: "פעילות בינונית" },
+  "assess.activity4": { en: "Very Active", he: "פעילות גבוהה" },
+  "assess.activity5": { en: "Athlete", he: "ספורטאי" },
+  "assess.allergies": { en: "Any food allergies?", he: "יש אלרגיות למזון?" },
+  "assess.allergyGluten": { en: "Gluten", he: "גלוטן" },
+  "assess.allergyLactose": { en: "Lactose", he: "לקטוז" },
+  "assess.allergyNone": { en: "None", he: "אין" },
+  "assess.mealFrequency": { en: "Meals per day?", he: "ארוחות ביום?" },
+  "assess.workoutDays": { en: "Workout days per week?", he: "ימי אימון בשבוע?" },
+  "assess.workoutDuration": { en: "Workout duration (minutes)?", he: "משך אימון (דקות)?" },
   "assess.injuries": { en: "Any physical injuries?", he: "יש פציעות גופניות?" },
   "assess.injuriesPlaceholder": { en: "e.g. Lower back pain, knee issues (optional)", he: "לדוגמה: כאבי גב תחתון, בעיות ברכיים (אופציונלי)" },
-  "assess.complete": { en: "Complete", he: "סיום" },
+  "assess.complete": { en: "Generate My Plan", he: "צרו את התוכנית שלי" },
   "assess.next": { en: "Next", he: "הבא" },
   "assess.back": { en: "Back", he: "חזרה" },
   "assess.done.title": { en: "Assessment Complete", he: "ההערכה הושלמה" },
@@ -48,6 +62,7 @@ const translations: Translations = {
   "assess.years": { en: "years", he: "שנים" },
   "assess.kg": { en: "kg", he: 'ק"ג' },
   "assess.cm": { en: "cm", he: 'ס"מ' },
+  "assess.generating": { en: "Generating your personalized plan...", he: "יוצר את התוכנית האישית שלך..." },
 
   // Workout
   "workout.title": { en: "WORKOUT", he: "אימון" },
@@ -71,6 +86,9 @@ const translations: Translations = {
   "nutrition.water": { en: "Water", he: "מים" },
   "nutrition.meals": { en: "Meals", he: "ארוחות" },
   "nutrition.fiber": { en: "Fiber", he: "סיבים" },
+  "nutrition.noData": { en: "Complete the assessment first to see your personalized nutrition plan.", he: "השלימו את ההערכה קודם כדי לראות את תוכנית התזונה האישית שלכם." },
+  "nutrition.dailyTargets": { en: "Your Daily Targets", he: "היעדים היומיים שלך" },
+  "nutrition.weeklyPlan": { en: "Weekly Plan", he: "תוכנית שבועית" },
 };
 
 interface LangContextType {
