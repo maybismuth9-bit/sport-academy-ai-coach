@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import heroImg from "@/assets/hero-gym.jpg";
+import logo from "@/assets/fuelcore-logo.png";
 import article1 from "@/assets/article-1.jpg";
 import article2 from "@/assets/article-2.jpg";
 import article3 from "@/assets/article-3.jpg";
@@ -17,17 +18,20 @@ const HomeFeed = () => {
   return (
     <div className="pb-24">
       <div className="relative h-64 overflow-hidden">
-        <img src={heroImg} alt="Sport Academy" className="w-full h-full object-cover" />
+        <img src={heroImg} alt="FuelCore" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        <div className="absolute bottom-6 left-5 right-5">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-2xl font-display font-bold tracking-wider neon-text text-primary"
-          >
-            {t("home.title")}
-          </motion.h1>
-          <p className="text-sm text-muted-foreground mt-1">{t("home.subtitle")}</p>
+        <div className="absolute bottom-6 left-5 right-5 flex items-end gap-3">
+          <img src={logo} alt="FuelCore logo" width={48} height={48} className="drop-shadow-[0_0_12px_hsl(180_80%_50%/0.5)]" />
+          <div>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-2xl font-display font-bold tracking-wider neon-text text-primary"
+            >
+              {t("home.title")}
+            </motion.h1>
+            <p className="text-sm text-muted-foreground mt-1">{t("home.subtitle")}</p>
+          </div>
         </div>
       </div>
 

@@ -29,7 +29,7 @@ const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
                 isActive ? "text-primary neon-text" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? "drop-shadow-[0_0_8px_hsl(142_72%_50%/0.6)]" : ""}`} />
+              <Icon className={`w-5 h-5 ${isActive ? "drop-shadow-[0_0_8px_hsl(180_80%_50%/0.6)]" : ""}`} />
               <span className="text-[10px] font-medium font-display tracking-wider uppercase">
                 {t(item.labelKey)}
               </span>
