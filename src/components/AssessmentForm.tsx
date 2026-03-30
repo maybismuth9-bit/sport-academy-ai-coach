@@ -73,8 +73,8 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
     t("assess.allergyNone"),
   ];
 
-  // Steps: 0-3 numeric, 4 goal, 5 activity, 6 allergies, 7 meal frequency, 8 workout days, 9 workout duration, 10 injuries
-  const totalSteps = 11;
+  // Steps: 0-3 numeric, 4 goal, 5 activity, 6 allergies, 7 meal frequency, 8 workout duration, 9 injuries
+  const totalSteps = 10;
   const progress = ((step + 1) / totalSteps) * 100;
 
   const toggleAllergy = (allergy: string) => {
