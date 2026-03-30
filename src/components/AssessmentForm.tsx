@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronLeft, CheckCircle2, Loader2 } from "lucide-react";
+import { ChevronRight, ChevronLeft, Loader2, CheckCircle2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,6 @@ export interface AssessmentData {
   activityLevel: string;
   allergies: string[];
   mealFrequency: string;
-  workoutDays: string;
   workoutDuration: string;
   injuries: string;
 }
@@ -40,18 +39,15 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
   const { t } = useLang();
   const [step, setStep] = useState(0);
   const [generating, setGenerating] = useState(false);
+  const [planReady, setPlanReady] = useState<{ data: AssessmentData; plan: NutritionPlan } | null>(null);
   const [data, setData] = useState<AssessmentData>({
     age: "", weight: "", height: "", bodyFat: "", goal: "",
     activityLevel: "", allergies: [], mealFrequency: "3",
-    workoutDays: "", workoutDuration: "", injuries: "",
+    workoutDuration: "", injuries: "",
   });
 
-  const numericSteps = [
-    { key: "age", label: t("assess.age"), placeholder: "e.g. 28", unit: t("assess.years") },
-    { key: "weight", label: t("assess.weight"), placeholder: "e.g. 75", unit: t("assess.kg") },
-    { key: "height", label: t("assess.height"), placeholder: "e.g. 178", unit: t("assess.cm") },
-    { key: "bodyFat", label: t("assess.bodyFat"), placeholder: "e.g. 18", unit: "%" },
-  ];
+  const totalSteps = 4;
+  const progress = ((step + 1) / totalSteps) * 100;
 
   const goals = [
     t("assess.goalMuscle"),
@@ -72,10 +68,6 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
     t("assess.allergyLactose"),
     t("assess.allergyNone"),
   ];
-
-  // Steps: 0-3 numeric, 4 goal, 5 activity, 6 allergies, 7 meal frequency, 8 workout duration, 9 injuries
-  const totalSteps = 10;
-  const progress = ((step + 1) / totalSteps) * 100;
 
   const toggleAllergy = (allergy: string) => {
     const noneLabel = t("assess.allergyNone");
@@ -99,10 +91,11 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
       });
       if (error) throw error;
       if (result?.error) throw new Error(result.error);
-      onComplete(data, result.plan);
+      setPlanReady({ data, plan: result.plan });
     } catch (e: any) {
       console.error(e);
       toast.error(e.message || "Failed to generate plan. Please try again.");
+    } finally {
       setGenerating(false);
     }
   };
@@ -114,8 +107,6 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
 
   const handleBack = () => { if (step > 0) setStep(step - 1); };
 
-  const canProceed = () => true;
-
   if (generating) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
@@ -125,110 +116,154 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
     );
   }
 
-  const renderStep = () => {
-    if (step < 4) {
-      const s = numericSteps[step];
-      return (
-        <div className="space-y-4">
-          <Label className="text-xl font-semibold text-foreground">{s.label}</Label>
-          <div className="relative">
-            <Input type="number" placeholder={s.placeholder} value={data[s.key as keyof AssessmentData] as string}
-              onChange={(e) => setData({ ...data, [s.key]: e.target.value })}
-              className="text-lg h-14 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:neon-border pr-12" />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{s.unit}</span>
-          </div>
-        </div>
-      );
-    }
-    if (step === 4) {
-      return (
-        <div className="space-y-4">
-          <Label className="text-xl font-semibold text-foreground">{t("assess.goal")}</Label>
-          <div className="grid grid-cols-1 gap-3 mt-4">
-            {goals.map((goal) => (
-              <button key={goal} onClick={() => setData({ ...data, goal })}
-                className={`p-4 rounded-xl text-left font-semibold transition-all duration-300 border ${data.goal === goal ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
-                {goal}
-              </button>
-            ))}
-          </div>
-        </div>
-      );
-    }
-    if (step === 5) {
-      return (
-        <div className="space-y-4">
-          <Label className="text-xl font-semibold text-foreground">{t("assess.activityLevel")}</Label>
-          <div className="grid grid-cols-1 gap-3 mt-4">
-            {activityLevels.map((level) => (
-              <button key={level.value} onClick={() => setData({ ...data, activityLevel: level.value })}
-                className={`p-4 rounded-xl text-left font-semibold transition-all duration-300 border ${data.activityLevel === level.value ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
-                <span className="text-accent mr-2">{level.value}</span> {level.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      );
-    }
-    if (step === 6) {
-      return (
-        <div className="space-y-4">
-          <Label className="text-xl font-semibold text-foreground">{t("assess.allergies")}</Label>
-          <div className="grid grid-cols-1 gap-3 mt-4">
-            {allergyOptions.map((allergy) => (
-              <button key={allergy} onClick={() => toggleAllergy(allergy)}
-                className={`p-4 rounded-xl text-left font-semibold transition-all duration-300 border ${data.allergies.includes(allergy) ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
-                {allergy}
-              </button>
-            ))}
-          </div>
-        </div>
-      );
-    }
-    if (step === 7) {
-      return (
-        <div className="space-y-4">
-          <Label className="text-xl font-semibold text-foreground">{t("assess.mealFrequency")}</Label>
-          <div className="grid grid-cols-5 gap-2 mt-4">
-            {[2, 3, 4, 5, 6].map((n) => (
-              <button key={n} onClick={() => setData({ ...data, mealFrequency: String(n) })}
-                className={`p-4 rounded-xl text-center text-lg font-bold transition-all duration-300 border ${data.mealFrequency === String(n) ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
-      );
-    }
-    if (step === 8) {
-      return (
-        <div className="space-y-4">
-          <Label className="text-xl font-semibold text-foreground">{t("assess.workoutDuration")}</Label>
-          <div className="relative">
-            <Input type="number" placeholder="e.g. 60" value={data.workoutDuration}
-              onChange={(e) => setData({ ...data, workoutDuration: e.target.value })}
-              className="text-lg h-14 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:neon-border pr-16" />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">min</span>
-          </div>
-        </div>
-      );
-    }
+  if (planReady) {
     return (
-      <div className="space-y-4">
-        <Label className="text-xl font-semibold text-foreground">{t("assess.injuries")}</Label>
-        <Input placeholder={t("assess.injuriesPlaceholder")} value={data.injuries}
-          onChange={(e) => setData({ ...data, injuries: e.target.value })}
-          className="text-lg h-14 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:neon-border" />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}
+          className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mb-6">
+          <CheckCircle2 className="w-12 h-12 text-primary" />
+        </motion.div>
+        <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+          className="text-2xl font-display font-bold text-foreground mb-2 text-center">
+          {t("assess.planReady")}
+        </motion.h2>
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+          className="text-muted-foreground text-center mb-8">
+          {t("assess.planReadyDesc")}
+        </motion.p>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
+          <Button onClick={() => onComplete(planReady.data, planReady.plan)}
+            className="h-14 px-8 bg-primary text-primary-foreground font-display font-bold tracking-wider text-lg">
+            <Sparkles className="w-5 h-5 mr-2" /> {t("assess.seePlan")}
+          </Button>
+        </motion.div>
       </div>
     );
+  }
+
+  const renderStep = () => {
+    switch (step) {
+      // Step 1: Goal
+      case 0:
+        return (
+          <div className="space-y-4">
+            <Label className="text-xl font-semibold text-foreground">{t("assess.goal")}</Label>
+            <div className="grid grid-cols-1 gap-3 mt-4">
+              {goals.map((goal) => (
+                <button key={goal} onClick={() => setData({ ...data, goal })}
+                  className={`p-4 rounded-xl text-left font-semibold transition-all duration-300 border ${data.goal === goal ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
+                  {goal}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Step 2: Physical stats
+      case 1:
+        return (
+          <div className="space-y-5">
+            <Label className="text-xl font-semibold text-foreground">{t("assess.physicalStats")}</Label>
+            {[
+              { key: "age", label: t("assess.age"), placeholder: "e.g. 28", unit: t("assess.years") },
+              { key: "weight", label: t("assess.weight"), placeholder: "e.g. 75", unit: t("assess.kg") },
+              { key: "height", label: t("assess.height"), placeholder: "e.g. 178", unit: t("assess.cm") },
+              { key: "bodyFat", label: t("assess.bodyFat"), placeholder: "e.g. 18", unit: "%" },
+            ].map((field) => (
+              <div key={field.key} className="space-y-1">
+                <span className="text-sm text-muted-foreground">{field.label}</span>
+                <div className="relative">
+                  <Input type="number" placeholder={field.placeholder}
+                    value={data[field.key as keyof AssessmentData] as string}
+                    onChange={(e) => setData({ ...data, [field.key]: e.target.value })}
+                    className="text-lg h-12 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:neon-border pr-12" />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{field.unit}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      // Step 3: Activity level & injuries
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <Label className="text-xl font-semibold text-foreground">{t("assess.activityLevel")}</Label>
+              <div className="grid grid-cols-1 gap-3">
+                {activityLevels.map((level) => (
+                  <button key={level.value} onClick={() => setData({ ...data, activityLevel: level.value })}
+                    className={`p-3 rounded-xl text-left font-semibold transition-all duration-300 border text-sm ${data.activityLevel === level.value ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
+                    <span className="text-accent mr-2">{level.value}</span> {level.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-base font-semibold text-foreground">{t("assess.injuries")}</Label>
+              <Input placeholder={t("assess.injuriesPlaceholder")} value={data.injuries}
+                onChange={(e) => setData({ ...data, injuries: e.target.value })}
+                className="h-12 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:neon-border" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-base font-semibold text-foreground">{t("assess.workoutDuration")}</Label>
+              <div className="relative">
+                <Input type="number" placeholder="e.g. 60" value={data.workoutDuration}
+                  onChange={(e) => setData({ ...data, workoutDuration: e.target.value })}
+                  className="h-12 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:neon-border pr-16" />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">min</span>
+              </div>
+            </div>
+          </div>
+        );
+
+      // Step 4: Dietary preferences
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <Label className="text-xl font-semibold text-foreground">{t("assess.allergies")}</Label>
+              <div className="grid grid-cols-1 gap-3">
+                {allergyOptions.map((allergy) => (
+                  <button key={allergy} onClick={() => toggleAllergy(allergy)}
+                    className={`p-4 rounded-xl text-left font-semibold transition-all duration-300 border ${data.allergies.includes(allergy) ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
+                    {allergy}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-base font-semibold text-foreground">{t("assess.mealFrequency")}</Label>
+              <div className="grid grid-cols-5 gap-2">
+                {[2, 3, 4, 5, 6].map((n) => (
+                  <button key={n} onClick={() => setData({ ...data, mealFrequency: String(n) })}
+                    className={`p-3 rounded-xl text-center text-lg font-bold transition-all duration-300 border ${data.mealFrequency === String(n) ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
+
+  const stepLabels = [
+    t("assess.stepGoal"),
+    t("assess.stepStats"),
+    t("assess.stepActivity"),
+    t("assess.stepDiet"),
+  ];
 
   return (
     <div className="px-5 pt-8 pb-28">
       <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary mb-1">{t("assess.title")}</h1>
-      <p className="text-sm text-muted-foreground mb-8">{t("assess.step")} {step + 1} {t("assess.of")} {totalSteps}</p>
+      <p className="text-sm text-muted-foreground mb-2">{t("assess.step")} {step + 1} {t("assess.of")} {totalSteps} — {stepLabels[step]}</p>
 
-      <div className="h-1 bg-secondary rounded-full mb-10 overflow-hidden">
+      <div className="h-1 bg-secondary rounded-full mb-8 overflow-hidden">
         <motion.div className="h-full bg-primary rounded-full" animate={{ width: `${progress}%` }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           style={{ boxShadow: "0 0 10px hsl(180 80% 50% / 0.5)" }} />
@@ -246,8 +281,8 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
             <ChevronLeft className="w-4 h-4 mr-1" /> {t("assess.back")}
           </Button>
         )}
-        <Button onClick={handleNext} disabled={!canProceed()}
-          className="flex-1 h-12 bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:bg-primary/90 disabled:opacity-30">
+        <Button onClick={handleNext}
+          className="flex-1 h-12 bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:bg-primary/90">
           {step === totalSteps - 1 ? t("assess.complete") : t("assess.next")} <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </div>

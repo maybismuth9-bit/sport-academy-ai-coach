@@ -6,11 +6,12 @@ import WorkoutGenerator from "@/components/WorkoutGenerator";
 import NutritionDashboard from "@/components/NutritionDashboard";
 import LangToggle from "@/components/LangToggle";
 import { LangProvider, useLang } from "@/contexts/LangContext";
-import { NutritionPlan } from "@/components/AssessmentForm";
+import { NutritionPlan, AssessmentData } from "@/components/AssessmentForm";
 
 const AppContent = () => {
   const [page, setPage] = useState("home");
   const [nutritionPlan, setNutritionPlan] = useState<NutritionPlan | null>(null);
+  const [assessmentData, setAssessmentData] = useState<AssessmentData | null>(null);
   const { dir } = useLang();
 
   return (
@@ -18,13 +19,14 @@ const AppContent = () => {
       <LangToggle />
       {page === "home" && <HomeFeed />}
       {page === "assessment" && (
-        <AssessmentForm onComplete={(_, plan) => {
+        <AssessmentForm onComplete={(data, plan) => {
+          setAssessmentData(data);
           setNutritionPlan(plan);
           setPage("nutrition");
         }} />
       )}
       {page === "workout" && <WorkoutGenerator />}
-      {page === "nutrition" && <NutritionDashboard plan={nutritionPlan} />}
+      {page === "nutrition" && <NutritionDashboard plan={nutritionPlan} assessmentData={assessmentData} />}
       <BottomNav active={page} onNavigate={setPage} />
     </div>
   );
