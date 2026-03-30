@@ -100,6 +100,8 @@ const translations: Translations = {
   "nutrition.noData": { en: "Complete the assessment first to see your personalized nutrition plan.", he: "השלימו את ההערכה קודם כדי לראות את תוכנית התזונה האישית שלכם." },
   "nutrition.dailyTargets": { en: "Your Daily Targets", he: "היעדים היומיים שלך" },
   "nutrition.weeklyPlan": { en: "Weekly Plan", he: "תוכנית שבועית" },
+  "nutrition.dailyWorkout": { en: "Daily Workout", he: "אימון יומי" },
+  "nutrition.recovery": { en: "Physio Recovery", he: "שיקום פיזיותרפי" },
 };
 
 interface LangContextType {
