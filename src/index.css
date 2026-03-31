@@ -36,6 +36,9 @@
 
     --radius: 0.75rem;
 
+    --cta-orange: 25 95% 55%;
+    --cta-green: 145 70% 40%;
+
     --neon-glow: 0 0 20px hsl(180 80% 50% / 0.4), 0 0 60px hsl(180 80% 50% / 0.15);
     --neon-glow-strong: 0 0 20px hsl(180 80% 50% / 0.6), 0 0 80px hsl(180 80% 50% / 0.25);
     --violet-glow: 0 0 20px hsl(270 60% 60% / 0.3), 0 0 60px hsl(270 60% 60% / 0.1);
