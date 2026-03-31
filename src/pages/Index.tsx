@@ -17,7 +17,7 @@ const AppContent = () => {
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto relative" dir={dir}>
       <LangToggle />
-      {page === "home" && <HomeFeed />}
+      {page === "home" && <HomeFeed onStartAssessment={() => setPage("assessment")} />}
       {page === "assessment" && (
         <AssessmentForm onComplete={(data, plan) => {
           setAssessmentData(data);

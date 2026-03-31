@@ -16,6 +16,13 @@ const translations: Translations = {
   // Home
   "home.title": { en: "FUELCORE", he: "FUELCORE" },
   "home.subtitle": { en: "Your AI-powered fitness & nutrition feed", he: "הפיד שלך לכושר ותזונה מבוסס AI" },
+  "home.heroHeadline": { en: "Fuel Your Body.\nGet a Personalized AI Plan.", he: "תדלק את הגוף שלך.\nקבל תוכנית AI אישית." },
+  "home.step1": { en: "Fill out the data questionnaire (2 minutes).", he: "מלא את שאלון הנתונים (2 דקות)." },
+  "home.step2": { en: "Our medical expert will approve the plan.", he: "המומחה הרפואי שלנו יאשר את התוכנית." },
+  "home.step3": { en: "Get a full workout & nutrition plan to your email.", he: "קבל תוכנית אימון ותזונה מלאה למייל שלך." },
+  "home.stepsTitle": { en: "3 Steps to Your Pilot", he: "3 שלבים לפיילוט" },
+  "home.ctaButton": { en: "I Want to Start Now!", he: "אני רוצה להתחיל עכשיו!" },
+  "home.limitedTime": { en: "🔥 Limited time — completely free pilot!", he: "🔥 לזמן מוגבל — פיילוט ללא עלות!" },
   "home.latest": { en: "Latest Articles", he: "מאמרים אחרונים" },
   "home.article1.title": { en: "5 Compound Movements That Build Real Strength", he: "5 תרגילים מורכבים שבונים כוח אמיתי" },
   "home.article1.summary": { en: "Master the deadlift, squat, bench press, overhead press and barbell row for maximum muscle activation.", he: "שלטו בדדליפט, סקוואט, לחיצת חזה, לחיצת כתפיים ושורה עם מוט למקסימום הפעלת שרירים." },
