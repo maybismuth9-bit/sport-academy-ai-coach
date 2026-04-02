@@ -1,12 +1,9 @@
 import { motion } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
-import { Zap, ClipboardCheck, UserCheck, Mail } from "lucide-react";
+import { Zap, ClipboardCheck, UserCheck, Mail, Flame, TrendingUp, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImg from "@/assets/hero-gym.jpg";
 import logo from "@/assets/fuelcore-logo.png";
-import article1 from "@/assets/article-1.jpg";
-import article2 from "@/assets/article-2.jpg";
-import article3 from "@/assets/article-3.jpg";
 
 interface HomeFeedProps {
   onStartAssessment: () => void;
@@ -21,10 +18,10 @@ const HomeFeed = ({ onStartAssessment }: HomeFeedProps) => {
     { icon: Mail, text: t("home.step3") },
   ];
 
-  const articles = [
-    { id: 1, title: t("home.article1.title"), summary: t("home.article1.summary"), image: article1, category: t("home.article1.category"), readTime: "4 min" },
-    { id: 2, title: t("home.article2.title"), summary: t("home.article2.summary"), image: article2, category: t("home.article2.category"), readTime: "6 min" },
-    { id: 3, title: t("home.article3.title"), summary: t("home.article3.summary"), image: article3, category: t("home.article3.category"), readTime: "5 min" },
+  const tips = [
+    { icon: Flame, titleKey: "home.tip1.title", descKey: "home.tip1.desc" },
+    { icon: TrendingUp, titleKey: "home.tip2.title", descKey: "home.tip2.desc" },
+    { icon: Dumbbell, titleKey: "home.tip3.title", descKey: "home.tip3.desc" },
   ];
 
   return (
@@ -48,24 +45,35 @@ const HomeFeed = ({ onStartAssessment }: HomeFeedProps) => {
         </div>
       </div>
 
-      {/* Hero headline */}
-      <div className="px-5 mt-8 text-center">
-        <motion.h2
+      {/* Daily Motivation */}
+      <div className="px-5 mt-6">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="text-2xl sm:text-3xl font-display font-extrabold leading-tight text-cta-orange whitespace-pre-line"
-          style={{ textShadow: "0 0 24px hsl(25 95% 55% / 0.4)" }}
+          transition={{ delay: 0.1 }}
+          className="glass-card rounded-2xl p-5 border-l-4 border-cta-orange"
         >
-          {t("home.heroHeadline")}
-        </motion.h2>
+          <p className="text-sm font-semibold text-cta-orange mb-1">{t("home.dailyMotivation")}</p>
+          <p className="text-foreground text-sm italic leading-relaxed">"{t("home.motivationQuote")}"</p>
+        </motion.div>
+      </div>
 
-        {/* Limited time badge */}
+      {/* Quick Start Button */}
+      <div className="px-5 mt-5">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}>
+          <Button
+            onClick={onStartAssessment}
+            className="w-full h-14 text-lg font-display font-bold tracking-wide bg-cta-green hover:bg-cta-green/90 text-white rounded-xl shadow-[0_0_30px_hsl(145_70%_40%/0.4)]"
+          >
+            <Zap className="w-5 h-5 mr-2" />
+            {t("home.ctaButton")}
+          </Button>
+        </motion.div>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="mt-3 text-sm font-semibold text-cta-orange animate-pulse-neon"
+          className="mt-2 text-center text-xs font-semibold text-cta-orange animate-pulse-neon"
         >
           {t("home.limitedTime")}
         </motion.p>
@@ -82,7 +90,7 @@ const HomeFeed = ({ onStartAssessment }: HomeFeedProps) => {
               key={i}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + i * 0.12 }}
+              transition={{ delay: 0.3 + i * 0.1 }}
               className="glass-card rounded-xl p-4 flex items-center gap-4"
             >
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center">
@@ -94,49 +102,30 @@ const HomeFeed = ({ onStartAssessment }: HomeFeedProps) => {
         </div>
       </div>
 
-      {/* CTA Button */}
-      <div className="px-5 mt-8 text-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.7 }}
-        >
-          <Button
-            onClick={onStartAssessment}
-            className="w-full h-14 text-lg font-display font-bold tracking-wide bg-cta-green hover:bg-cta-green/90 text-white rounded-xl shadow-[0_0_30px_hsl(145_70%_40%/0.4)]"
-          >
-            <Zap className="w-5 h-5 mr-2" />
-            {t("home.ctaButton")}
-          </Button>
-        </motion.div>
-      </div>
-
-      {/* Articles */}
-      <div className="px-4 mt-10 space-y-4">
-        <h2 className="text-xs font-display font-semibold tracking-[0.2em] uppercase text-muted-foreground">
-          {t("home.latest")}
-        </h2>
-        {articles.map((article, i) => (
-          <motion.article
-            key={article.id}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 + i * 0.1 }}
-            className="glass-card rounded-xl overflow-hidden cursor-pointer hover:neon-border transition-shadow duration-300"
-          >
-            <img src={article.image} alt={article.title} className="w-full h-40 object-cover" loading="lazy" />
-            <div className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] font-display font-semibold tracking-widest uppercase text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                  {article.category}
-                </span>
-                <span className="text-[10px] text-muted-foreground">{article.readTime}</span>
+      {/* Fitness Tips Cards */}
+      <div className="px-5 mt-8">
+        <h3 className="text-xs font-display font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-4">
+          {t("home.tipsTitle")}
+        </h3>
+        <div className="space-y-3">
+          {tips.map((tip, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 + i * 0.1 }}
+              className="glass-card rounded-xl p-4 flex items-start gap-3"
+            >
+              <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-accent/15 flex items-center justify-center">
+                <tip.icon className="w-4 h-4 text-accent" />
               </div>
-              <h3 className="font-semibold text-foreground leading-tight">{article.title}</h3>
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{article.summary}</p>
-            </div>
-          </motion.article>
-        ))}
+              <div>
+                <p className="font-semibold text-foreground text-sm">{t(tip.titleKey)}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{t(tip.descKey)}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );
