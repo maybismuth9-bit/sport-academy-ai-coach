@@ -12,11 +12,14 @@ import DailyWorkout from "@/components/DailyWorkout";
 import NutritionPlanPage from "@/components/NutritionPlanPage";
 import KnowledgeHub from "@/components/KnowledgeHub";
 import AuthPage from "@/components/AuthPage";
+import LandingPage from "@/components/LandingPage";
+import DashboardGreeting from "@/components/DashboardGreeting";
 import LangToggle from "@/components/LangToggle";
 import { LangProvider, useLang } from "@/contexts/LangContext";
 import { NutritionPlan, AssessmentData } from "@/components/AssessmentForm";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const AppContent = () => {
   const [page, setPage] = useState("home");
@@ -25,6 +28,7 @@ const AppContent = () => {
   const [hasCompletedAssessment, setHasCompletedAssessment] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showAuth, setShowAuth] = useState(false);
   const { dir, t } = useLang();
 
   useEffect(() => {
@@ -34,6 +38,7 @@ const AppContent = () => {
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) setShowAuth(false);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -41,24 +46,59 @@ const AppContent = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setShowAuth(false);
     setPage("home");
   };
 
   if (authLoading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>;
-  }
-
-  if (!user) {
     return (
-      <div className="min-h-screen bg-background" dir={dir}>
-        <LangToggle />
-        <AuthPage onAuth={() => {}} />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
+  // Guest experience: Landing page or Auth
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background" dir={dir}>
+        <div className="absolute top-4 right-4 z-50">
+          <LangToggle />
+        </div>
+        <AnimatePresence mode="wait">
+          {showAuth ? (
+            <motion.div
+              key="auth"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <div className="pt-4 px-4">
+                <button
+                  onClick={() => setShowAuth(false)}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  ← {t("auth.login") === "Log In" ? "Back" : "חזרה"}
+                </button>
+              </div>
+              <AuthPage onAuth={() => {}} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="landing"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+            >
+              <LandingPage onGetStarted={() => setShowAuth(true)} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  // Authenticated experience
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto relative" dir={dir}>
       <div className="flex items-center justify-between px-4 pt-2">
@@ -67,6 +107,10 @@ const AppContent = () => {
           <LogOut className="w-4 h-4" />
         </Button>
       </div>
+
+      {/* Personalized greeting on home */}
+      {page === "home" && <DashboardGreeting />}
+
       {page === "home" && <HomeFeed onStartAssessment={() => setPage("assessment")} />}
       {page === "assessment" && (
         <AssessmentForm onComplete={(data, plan) => {
