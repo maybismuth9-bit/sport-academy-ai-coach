@@ -125,7 +125,7 @@ const AppContent = () => {
       {page === "academy" && <AcademyPage />}
       {page === "workout" && <WorkoutGenerator />}
       {page === "nutrition" && <NutritionDashboard plan={nutritionPlan} assessmentData={assessmentData} />}
-      {page === "recovery" && <RecoveryPage />}
+      {page === "recovery" && <PhysioPage />}
       {page === "progress" && <ProgressTracker />}
       {page === "dailyWorkout" && <DailyWorkout />}
       {page === "nutritionPlan" && <NutritionPlanPage />}
