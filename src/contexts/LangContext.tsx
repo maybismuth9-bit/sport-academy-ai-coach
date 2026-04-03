@@ -200,6 +200,12 @@ const translations: Translations = {
   "nutrition.dailyWorkout": { en: "Daily Workout", he: "אימון יומי", es: "Entreno diario", zh: "每日训练", ar: "تمرين يومي", de: "Tägliches Training" },
   "nutrition.recovery": { en: "Physio Recovery", he: "שיקום פיזיותרפי", es: "Recuperación fisioterapéutica", zh: "理疗恢复", ar: "العلاج الطبيعي", de: "Physiotherapie" },
 
+  // Physio
+  "physio.title": { en: "PHYSIOTHERAPY", he: "פיזיותרפיה", es: "FISIOTERAPIA", zh: "理疗", ar: "العلاج الطبيعي", de: "PHYSIOTHERAPIE" },
+  "physio.subtitle": { en: "Injury prevention & mobility work", he: "מניעת פציעות ועבודת ניידות", es: "Prevención de lesiones y movilidad", zh: "损伤预防与活动度训练", ar: "الوقاية من الإصابات وتمارين الحركة", de: "Verletzungsprävention & Mobilität" },
+  "physio.comingSoon": { en: "Coming Soon", he: "בקרוב", es: "Próximamente", zh: "即将推出", ar: "قريباً", de: "Demnächst" },
+  "physio.comingSoonDesc": { en: "We're building a comprehensive physiotherapy section with guided recovery exercises, mobility drills, and video tutorials tailored to your needs.", he: "אנחנו בונים מדור פיזיותרפיה מקיף עם תרגילי שיקום מודרכים, תרגילי ניידות וסרטוני הדרכה מותאמים אישית.", es: "Estamos construyendo una sección completa de fisioterapia con ejercicios guiados de recuperación.", zh: "我们正在构建全面的理疗板块，包含引导式恢复训练和视频教程。", ar: "نحن نبني قسماً شاملاً للعلاج الطبيعي مع تمارين تعافي موجهة.", de: "Wir bauen einen umfassenden Physiotherapie-Bereich mit geführten Übungen und Video-Tutorials." },
+
   // Recovery
   "recovery.title": { en: "RECOVERY", he: "שיקום", es: "RECUPERACIÓN", zh: "恢复", ar: "التعافي", de: "ERHOLUNG" },
   "recovery.subtitle": { en: "Mobility drills based on your pain points", he: "תרגילי ניידות מבוססי נקודות כאב", es: "Ejercicios de movilidad según tus puntos de dolor", zh: "基于疼痛点的活动度训练", ar: "تمارين الحركة بناءً على نقاط الألم", de: "Mobilitätsübungen basierend auf deinen Schmerzpunkten" },
