@@ -31,15 +31,22 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           {
             role: "system",
-            content: `You are a professional fitness & sports science writer. Generate an informative summary of at least 5 lines (5-7 sentences) about the given article. Write in ${targetLang}. The summary should be engaging, evidence-based, and accessible to fitness enthusiasts. Cover key findings, practical applications, and important takeaways. Do NOT include the title in the summary. Return ONLY the summary text, no formatting or labels.`,
+            content: `You are a professional fitness & sports science writer. You MUST generate a detailed, informative summary of EXACTLY 5 to 7 sentences about the given article topic. Write in ${targetLang}. 
+
+IMPORTANT RULES:
+- The summary MUST be at least 5 full sentences long. Never shorter.
+- Cover: (1) what the research found, (2) why it matters for athletes/fitness enthusiasts, (3) key data points or numbers, (4) practical application, (5) important caveats or takeaways.
+- Be engaging, evidence-based, and accessible.
+- Do NOT include the article title in the summary.
+- Return ONLY the summary text, no formatting, labels, or bullet points.`,
           },
           {
             role: "user",
-            content: `Article title: "${title}"${sourceUrl ? `\nSource: ${sourceUrl}` : ""}\n\nGenerate a professional 5-7 sentence summary of this sports science / fitness article. Include key research findings, practical takeaways, and actionable advice.`,
+            content: `Article title: "${title}"${sourceUrl ? `\nSource URL: ${sourceUrl}` : ""}\n\nWrite a detailed professional summary of 5-7 sentences about this sports science / fitness topic. Include specific research findings, practical takeaways, and actionable advice.`,
           },
         ],
       }),
