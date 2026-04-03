@@ -180,7 +180,12 @@ const translations: Translations = {
   "nutrition.fiber": { en: "Fiber", he: "סיבים", es: "Fibra", zh: "膳食纤维", ar: "الألياف", de: "Ballaststoffe" },
   "nutrition.noData": { en: "Complete the assessment first to see your personalized nutrition plan.", he: "השלימו את ההערכה קודם כדי לראות את תוכנית התזונה האישית שלכם.", es: "Completa la evaluación primero para ver tu plan.", zh: "先完成评估以查看您的个性化营养计划。", ar: "أكمل التقييم أولاً لرؤية خطتك الشخصية.", de: "Schließe zuerst die Bewertung ab, um deinen Plan zu sehen." },
   "nutrition.dailyTargets": { en: "Your Daily Targets", he: "היעדים היומיים שלך", es: "Tus objetivos diarios", zh: "你的每日目标", ar: "أهدافك اليومية", de: "Deine Tagesziele" },
-  "nutrition.weeklyPlan": { en: "Weekly Plan", he: "תוכנית שבועית", es: "Plan semanal", zh: "每周计划", ar: "الخطة الأسبوعية", de: "Wochenplan" },
+  "nutrition.weeklyPlan": { en: "AI Weekly Menu", he: "תפריט שבועי AI", es: "Menú semanal AI", zh: "AI每周菜单", ar: "قائمة أسبوعية AI", de: "AI Wochenmenü" },
+  "nutrition.generatePlan": { en: "Generate Menu", he: "צור תפריט", es: "Generar menú", zh: "生成菜单", ar: "إنشاء القائمة", de: "Menü erstellen" },
+  "nutrition.planReady": { en: "Your weekly meal plan is ready!", he: "תפריט השבועי שלך מוכן!", es: "¡Tu menú semanal está listo!", zh: "你的每周菜单准备好了!", ar: "قائمة طعامك الأسبوعية جاهزة!", de: "Dein Wochenmenü ist fertig!" },
+  "nutrition.emptyPlan": { en: "Generate a personalized AI meal plan with exact portions, calories, and timing for every day of the week.", he: "צרו תפריט תזונה אישי עם מנות מדויקות, קלוריות ותזמון לכל יום בשבוע.", es: "Genera un plan de comidas personalizado con porciones exactas, calorías y horarios.", zh: "生成个性化AI餐计划，包含每天的精确份量、热量和时间。", ar: "أنشئ خطة وجبات مخصصة بكميات دقيقة وسعرات حرارية وتوقيت.", de: "Erstelle einen personalisierten AI-Ernährungsplan mit genauen Portionen, Kalorien und Zeiten." },
+  "nutrition.total": { en: "total", he: "סה״כ", es: "total", zh: "总计", ar: "المجموع", de: "gesamt" },
+  "nutrition.manualLog": { en: "My Meal Log", he: "יומן הארוחות שלי", es: "Mi registro de comidas", zh: "我的用餐记录", ar: "سجل وجباتي", de: "Mein Essensprotokoll" },
   "nutrition.dailyWorkout": { en: "Daily Workout", he: "אימון יומי", es: "Entreno diario", zh: "每日训练", ar: "تمرين يومي", de: "Tägliches Training" },
   "nutrition.recovery": { en: "Physio Recovery", he: "שיקום פיזיותרפי", es: "Recuperación fisioterapéutica", zh: "理疗恢复", ar: "العلاج الطبيعي", de: "Physiotherapie" },
 
