@@ -138,7 +138,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
         await supabase.from("ai_meal_plans").insert({
           user_id: user.id,
           plan_data: data.plan,
-          goal: assessmentData.goal,
+          goal: assessmentData?.goal || "maintenance",
         });
         toast({ title: "🍽️", description: t("nutrition.planReady") });
       }
