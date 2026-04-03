@@ -39,7 +39,7 @@ serve(async (req) => {
           },
           {
             role: "user",
-            content: `Article title: "${title}"${sourceUrl ? `\nSource: ${sourceUrl}` : ""}\n\nGenerate a professional 4-5 line summary of this sports science / fitness article.`,
+            content: `Article title: "${title}"${sourceUrl ? `\nSource: ${sourceUrl}` : ""}\n\nGenerate a professional 5-7 sentence summary of this sports science / fitness article. Include key research findings, practical takeaways, and actionable advice.`,
           },
         ],
       }),
