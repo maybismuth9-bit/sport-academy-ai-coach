@@ -1,4 +1,4 @@
-import { Home, BookOpen, Dumbbell, Apple, ShieldCheck } from "lucide-react";
+import { Home, BookOpen, Dumbbell, Apple, Camera, ShieldCheck } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 
 interface BottomNavProps {
@@ -8,10 +8,10 @@ interface BottomNavProps {
 
 const navItems = [
   { id: "home", labelKey: "nav.home", icon: Home },
-  { id: "academy", labelKey: "nav.academy", icon: BookOpen },
+  { id: "knowledgeHub", labelKey: "nav.academy", icon: BookOpen },
   { id: "workout", labelKey: "nav.workout", icon: Dumbbell },
-  { id: "nutrition", labelKey: "nav.nutrition", icon: Apple },
-  { id: "recovery", labelKey: "nav.recovery", icon: ShieldCheck },
+  { id: "nutritionPlan", labelKey: "nav.nutrition", icon: Apple },
+  { id: "progress", labelKey: "nav.progress", icon: Camera },
 ];
 
 const BottomNav = ({ active, onNavigate }: BottomNavProps) => {

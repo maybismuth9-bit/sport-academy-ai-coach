@@ -177,6 +177,61 @@ const translations: Translations = {
   "recovery.knee.drill3": { en: "Glute Bridge Holds", he: "גשר ישבן" },
   "recovery.hip.drill1": { en: "90/90 Hip Stretch", he: "מתיחת ירך 90/90" },
   "recovery.hip.drill2": { en: "Pigeon Pose", he: "תנוחת יונה" },
+
+  // Auth
+  "auth.login": { en: "Log In", he: "התחברות" },
+  "auth.signup": { en: "Sign Up", he: "הרשמה" },
+  "auth.email": { en: "Email", he: "אימייל" },
+  "auth.password": { en: "Password", he: "סיסמה" },
+  "auth.loginSubtitle": { en: "Welcome back to FuelCore", he: "ברוכים השבים ל-FuelCore" },
+  "auth.signupSubtitle": { en: "Create your FuelCore account", he: "צרו חשבון FuelCore" },
+  "auth.noAccount": { en: "Don't have an account?", he: "אין לך חשבון?" },
+  "auth.hasAccount": { en: "Already have an account?", he: "כבר יש לך חשבון?" },
+  "auth.error": { en: "Authentication Error", he: "שגיאת אימות" },
+  "auth.checkEmail": { en: "Check your email", he: "בדקו את האימייל" },
+  "auth.checkEmailDesc": { en: "We sent you a verification link.", he: "שלחנו לכם קישור אימות." },
+  "auth.logout": { en: "Logout", he: "התנתקות" },
+
+  // Progress Tracker
+  "nav.progress": { en: "Progress", he: "התקדמות" },
+  "progress.title": { en: "PROGRESS TRACKER", he: "מעקב התקדמות" },
+  "progress.subtitle": { en: "Upload photos to track your transformation", he: "העלו תמונות לעקוב אחר השינוי" },
+  "progress.uploadHint": { en: "Tap to upload a progress photo", he: "לחצו להעלאת תמונת התקדמות" },
+  "progress.uploading": { en: "Uploading...", he: "מעלה..." },
+  "progress.uploaded": { en: "Photo uploaded!", he: "תמונה הועלתה!" },
+  "progress.error": { en: "Upload failed", he: "ההעלאה נכשלה" },
+  "progress.empty": { en: "No photos yet. Start tracking your progress!", he: "אין עדיין תמונות. התחילו לעקוב!" },
+
+  // Daily Workout
+  "dailyWorkout.title": { en: "DAILY WORKOUT", he: "אימון יומי" },
+  "dailyWorkout.subtitle": { en: "Your exercise library with video guides", he: "ספריית התרגילים שלך עם הדרכות וידאו" },
+  "dailyWorkout.empty": { en: "No exercises available yet.", he: "אין עדיין תרגילים." },
+  "dailyWorkout.videoSoon": { en: "Video coming soon", he: "וידאו בקרוב" },
+
+  // Nutrition Plan
+  "nutritionPlan.title": { en: "MY NUTRITION", he: "התזונה שלי" },
+  "nutritionPlan.subtitle": { en: "Track and manage your daily meals", he: "עקבו ונהלו את הארוחות היומיות" },
+  "nutritionPlan.addMeal": { en: "Add Meal", he: "הוסף ארוחה" },
+  "nutritionPlan.editMeal": { en: "Edit Meal", he: "ערוך ארוחה" },
+  "nutritionPlan.foodName": { en: "Food name", he: "שם המאכל" },
+  "nutritionPlan.calories": { en: "Calories", he: "קלוריות" },
+  "nutritionPlan.proteinG": { en: "Protein (g)", he: "חלבון (גרם)" },
+  "nutritionPlan.save": { en: "Save", he: "שמור" },
+  "nutritionPlan.updated": { en: "Meal updated!", he: "הארוחה עודכנה!" },
+  "nutritionPlan.added": { en: "Meal added!", he: "ארוחה נוספה!" },
+  "nutritionPlan.deleted": { en: "Meal deleted", he: "ארוחה נמחקה" },
+  "nutritionPlan.error": { en: "Error", he: "שגיאה" },
+  "nutritionPlan.empty": { en: "No meals logged yet. Start adding your meals!", he: "אין עדיין ארוחות. התחילו להוסיף!" },
+  "nutritionPlan.totalCals": { en: "Total Calories", he: "סה\"כ קלוריות" },
+  "nutritionPlan.totalProtein": { en: "Total Protein", he: "סה\"כ חלבון" },
+
+  // Knowledge Hub
+  "knowledgeHub.title": { en: "KNOWLEDGE HUB", he: "מרכז ידע" },
+  "knowledgeHub.subtitle": { en: "Searchable articles & resources", he: "מאמרים ומשאבים עם חיפוש" },
+  "knowledgeHub.search": { en: "Search articles...", he: "חפש מאמרים..." },
+  "knowledgeHub.all": { en: "All", he: "הכל" },
+  "knowledgeHub.readMore": { en: "Read More", he: "קרא עוד" },
+  "knowledgeHub.empty": { en: "No articles found.", he: "לא נמצאו מאמרים." },
 };
 
 interface LangContextType {
