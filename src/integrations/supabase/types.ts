@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_meal_plans: {
+        Row: {
+          created_at: string
+          goal: string
+          id: string
+          plan_data: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          goal?: string
+          id?: string
+          plan_data?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          goal?: string
+          id?: string
+          plan_data?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       articles: {
         Row: {
           category: string
@@ -45,6 +69,7 @@ export type Database = {
           instructions: string | null
           muscle_group: string
           title: string
+          training_day: string | null
           video_url: string | null
         }
         Insert: {
@@ -53,6 +78,7 @@ export type Database = {
           instructions?: string | null
           muscle_group: string
           title: string
+          training_day?: string | null
           video_url?: string | null
         }
         Update: {
@@ -61,6 +87,7 @@ export type Database = {
           instructions?: string | null
           muscle_group?: string
           title?: string
+          training_day?: string | null
           video_url?: string | null
         }
         Relationships: []
@@ -131,6 +158,42 @@ export type Database = {
           id?: string
           image_url?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      workout_logs: {
+        Row: {
+          created_at: string
+          exercise_name: string
+          id: string
+          logged_at: string
+          reps: number
+          sets: number
+          training_day: string
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          exercise_name: string
+          id?: string
+          logged_at?: string
+          reps?: number
+          sets?: number
+          training_day?: string
+          user_id: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          exercise_name?: string
+          id?: string
+          logged_at?: string
+          reps?: number
+          sets?: number
+          training_day?: string
+          user_id?: string
+          weight?: number
         }
         Relationships: []
       }
