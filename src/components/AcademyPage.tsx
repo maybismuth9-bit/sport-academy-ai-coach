@@ -1,45 +1,55 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, ExternalLink, ChevronDown, Sparkles, Loader2 } from "lucide-react";
+import { BookOpen, ExternalLink, ChevronDown, Sparkles, Loader2, RefreshCw } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
 import { supabase } from "@/integrations/supabase/client";
 
-interface Article {
-  id: number;
-  titleKey: string;
-  summaryKey: string;
-  categoryKey: string;
-  source: string;
-  sourceUrl: string;
-  readTime: string;
+interface DBArticle {
+  id: string;
+  title: string;
+  category: string;
+  summary: string | null;
+  link: string | null;
+  created_at: string;
 }
 
-const articles: Article[] = [
-  { id: 1, titleKey: "academy.article1.title", summaryKey: "academy.article1.summary", categoryKey: "academy.cat.strength", source: "PubMed", sourceUrl: "https://pubmed.ncbi.nlm.nih.gov/28934897/", readTime: "3 min" },
-  { id: 2, titleKey: "academy.article2.title", summaryKey: "academy.article2.summary", categoryKey: "academy.cat.nutrition", source: "JISSN Meta-Analysis", sourceUrl: "https://jissn.biomedcentral.com/articles/10.1186/s12970-018-0215-1", readTime: "4 min" },
-  { id: 3, titleKey: "academy.article3.title", summaryKey: "academy.article3.summary", categoryKey: "academy.cat.recovery", source: "Sports Medicine", sourceUrl: "https://link.springer.com/article/10.1007/s40279-017-0832-x", readTime: "3 min" },
-  { id: 4, titleKey: "academy.article4.title", summaryKey: "academy.article4.summary", categoryKey: "academy.cat.physiology", source: "JISSN Review", sourceUrl: "https://jissn.biomedcentral.com/articles/10.1186/s12970-017-0173-z", readTime: "5 min" },
-  { id: 5, titleKey: "academy.article5.title", summaryKey: "academy.article5.summary", categoryKey: "academy.cat.performance", source: "British J. Sports Med.", sourceUrl: "https://bjsm.bmj.com/content/53/10/655", readTime: "4 min" },
-  { id: 6, titleKey: "academy.article6.title", summaryKey: "academy.article6.summary", categoryKey: "academy.cat.nutrition", source: "NEJM Review", sourceUrl: "https://www.nejm.org/doi/full/10.1056/NEJMra1905136", readTime: "5 min" },
-  { id: 7, titleKey: "academy.article7.title", summaryKey: "academy.article7.summary", categoryKey: "academy.cat.strength", source: "Sports Medicine", sourceUrl: "https://link.springer.com/article/10.1007/s40279-021-01460-7", readTime: "4 min" },
-  { id: 8, titleKey: "academy.article8.title", summaryKey: "academy.article8.summary", categoryKey: "academy.cat.recovery", source: "PLoS ONE", sourceUrl: "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0251735", readTime: "3 min" },
-];
-
 const categoryColorMap: Record<string, string> = {
-  "academy.cat.strength": "bg-cta-orange/15 text-cta-orange",
-  "academy.cat.nutrition": "bg-cta-green/15 text-cta-green",
-  "academy.cat.recovery": "bg-accent/15 text-accent",
-  "academy.cat.physiology": "bg-primary/15 text-primary",
-  "academy.cat.performance": "bg-cta-orange/15 text-cta-orange",
+  "Strength": "bg-cta-orange/15 text-cta-orange",
+  "Nutrition": "bg-cta-green/15 text-cta-green",
+  "Recovery": "bg-accent/15 text-accent",
+  "Physiology": "bg-primary/15 text-primary",
+  "Performance": "bg-cta-orange/15 text-cta-orange",
+  "Science": "bg-primary/15 text-primary",
+  "General": "bg-muted text-muted-foreground",
 };
 
 const AcademyPage = () => {
   const { t, lang } = useLang();
-  const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [aiSummaries, setAiSummaries] = useState<Record<number, string>>({});
-  const [loadingSummary, setLoadingSummary] = useState<number | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [aiSummaries, setAiSummaries] = useState<Record<string, string>>({});
+  const [loadingSummary, setLoadingSummary] = useState<string | null>(null);
+  const [articles, setArticles] = useState<DBArticle[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const fetchAiSummary = useCallback(async (article: Article) => {
+  useEffect(() => {
+    fetchArticles();
+  }, []);
+
+  const fetchArticles = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    
+    if (!error && data) {
+      setArticles(data as DBArticle[]);
+    }
+    setLoading(false);
+  };
+
+  const fetchAiSummary = useCallback(async (article: DBArticle) => {
     const cacheKey = `fuelcore_summary_${article.id}_${lang}`;
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
@@ -51,8 +61,8 @@ const AcademyPage = () => {
     try {
       const { data, error } = await supabase.functions.invoke("generate-article-summary", {
         body: {
-          title: t(article.titleKey),
-          sourceUrl: article.sourceUrl,
+          title: article.title,
+          sourceUrl: article.link || "",
           language: lang,
         },
       });
@@ -69,7 +79,7 @@ const AcademyPage = () => {
     }
   }, [lang, t]);
 
-  const handleArticleToggle = (article: Article) => {
+  const handleArticleToggle = (article: DBArticle) => {
     if (expandedId === article.id) {
       setExpandedId(null);
     } else {
@@ -78,6 +88,14 @@ const AcademyPage = () => {
         fetchAiSummary(article);
       }
     }
+  };
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(lang === "he" ? "he-IL" : lang === "ar" ? "ar" : lang === "de" ? "de-DE" : lang === "es" ? "es-ES" : lang === "zh" ? "zh-CN" : "en-US", {
+      day: "numeric",
+      month: "short",
+    });
   };
 
   return (
@@ -95,86 +113,95 @@ const AcademyPage = () => {
         <p className="text-xs text-muted-foreground">{t("academy.aiSummaryNote")}</p>
       </div>
 
-      <div className="space-y-3">
-        {articles.map((article, i) => {
-          const staticSummary = t(article.summaryKey);
-          const isExpanded = expandedId === article.id;
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="w-6 h-6 text-primary animate-spin" />
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {articles.map((article, i) => {
+            const isExpanded = expandedId === article.id;
+            const staticSummary = article.summary || "";
 
-          return (
-            <motion.div
-              key={article.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              className="glass-card rounded-xl overflow-hidden"
-            >
-              <button
-                onClick={() => handleArticleToggle(article)}
-                className="w-full text-left p-4"
+            return (
+              <motion.div
+                key={article.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+                className="glass-card rounded-xl overflow-hidden"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-[10px] font-display font-semibold tracking-widest uppercase px-2 py-0.5 rounded-full ${categoryColorMap[article.categoryKey] || "bg-primary/10 text-primary"}`}>
-                      {t(article.categoryKey)}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">{article.readTime}</span>
-                  </div>
-                  <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`} />
-                </div>
-                <h3 className="font-semibold text-foreground leading-tight text-sm mb-2">
-                  {t(article.titleKey)}
-                </h3>
-                {/* Static 3-line summary always visible */}
-                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                  {staticSummary}
-                </p>
-              </button>
-
-              <AnimatePresence>
-                {isExpanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="px-4 pb-4"
-                  >
-                    <div className="border-t border-border pt-3 mt-1">
-                      {loadingSummary === article.id ? (
-                        <div className="flex items-center gap-2 py-3">
-                          <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                          <span className="text-xs text-muted-foreground">{t("academy.generatingSummary")}</span>
-                        </div>
-                      ) : aiSummaries[article.id] ? (
-                        <>
-                          <div className="flex items-center gap-1.5 mb-2">
-                            <Sparkles className="w-3 h-3 text-cta-orange" />
-                            <span className="text-[10px] font-display font-semibold text-cta-orange tracking-wider uppercase">
-                              {t("academy.aiSummary")}
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
-                            {aiSummaries[article.id]}
-                          </p>
-                        </>
-                      ) : null}
+                <button
+                  onClick={() => handleArticleToggle(article)}
+                  className="w-full text-left p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`text-[10px] font-display font-semibold tracking-widest uppercase px-2 py-0.5 rounded-full ${categoryColorMap[article.category] || "bg-primary/10 text-primary"}`}>
+                        {article.category}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">{formatDate(article.created_at)}</span>
                     </div>
+                    <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                  </div>
+                  <h3 className="font-semibold text-foreground leading-tight text-sm mb-2">
+                    {article.title}
+                  </h3>
+                  {staticSummary && (
+                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                      {staticSummary}
+                    </p>
+                  )}
+                </button>
 
-                    <a
-                      href={article.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="px-4 pb-4"
                     >
-                      <ExternalLink className="w-3 h-3" />
-                      {t("knowledgeHub.readMore")} — {article.source}
-                    </a>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          );
-        })}
-      </div>
+                      <div className="border-t border-border pt-3 mt-1">
+                        {loadingSummary === article.id ? (
+                          <div className="flex items-center gap-2 py-3">
+                            <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                            <span className="text-xs text-muted-foreground">{t("academy.generatingSummary")}</span>
+                          </div>
+                        ) : aiSummaries[article.id] ? (
+                          <>
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <Sparkles className="w-3 h-3 text-cta-orange" />
+                              <span className="text-[10px] font-display font-semibold text-cta-orange tracking-wider uppercase">
+                                {t("academy.aiSummary")}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+                              {aiSummaries[article.id]}
+                            </p>
+                          </>
+                        ) : null}
+                      </div>
+
+                      {article.link && (
+                        <a
+                          href={article.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          {t("academy.source")}
+                        </a>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
