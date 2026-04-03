@@ -211,6 +211,13 @@ const translations: Translations = {
   "nutrition.replacePlan": { en: "Replace Plan", he: "החלף תפריט", es: "Reemplazar menú", zh: "替换菜单", ar: "استبدال القائمة", de: "Menü ersetzen" },
   "nutrition.deletePlan": { en: "Delete Plan", he: "מחק תפריט", es: "Eliminar menú", zh: "删除菜单", ar: "حذف القائمة", de: "Menü löschen" },
   "nutrition.manualLog": { en: "My Meal Log", he: "יומן הארוחות שלי", es: "Mi registro de comidas", zh: "我的用餐记录", ar: "سجل وجباتي", de: "Mein Essensprotokoll" },
+  "nutrition.swapItem": { en: "Swap Item", he: "החלף מוצר", es: "Cambiar item", zh: "替换食物", ar: "تبديل عنصر", de: "Artikel tauschen" },
+  "nutrition.swapMeal": { en: "Swap Meal", he: "החלף ארוחה", es: "Cambiar comida", zh: "替换餐食", ar: "تبديل وجبة", de: "Mahlzeit tauschen" },
+  "nutrition.swapping": { en: "Swapping...", he: "מחליף...", es: "Cambiando...", zh: "替换中...", ar: "جارٍ التبديل...", de: "Tausche..." },
+  "nutrition.mealsPerDay": { en: "Meals/day", he: "ארוחות/יום", es: "Comidas/día", zh: "餐/天", ar: "وجبات/يوم", de: "Mahlzeiten/Tag" },
+  "nutrition.weeklyTotal": { en: "Weekly Total", he: "סה״כ שבועי", es: "Total semanal", zh: "每周总计", ar: "المجموع الأسبوعي", de: "Wochensumme" },
+  "nutrition.dailyTotal": { en: "Daily Total", he: "סה״כ יומי", es: "Total diario", zh: "日总计", ar: "المجموع اليومي", de: "Tagessumme" },
+  "nutrition.adjustMeals": { en: "Adjust meal count", he: "שנה כמות ארוחות", es: "Ajustar comidas", zh: "调整餐数", ar: "تعديل عدد الوجبات", de: "Mahlzeitenanzahl" },
   "nutrition.dailyWorkout": { en: "Daily Workout", he: "אימון יומי", es: "Entreno diario", zh: "每日训练", ar: "تمرين يومي", de: "Tägliches Training" },
   "nutrition.recovery": { en: "Physio Recovery", he: "שיקום פיזיותרפי", es: "Recuperación fisioterapéutica", zh: "理疗恢复", ar: "العلاج الطبيعي", de: "Physiotherapie" },
 
