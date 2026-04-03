@@ -1,40 +1,47 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { NutritionPlan, AssessmentData } from "@/components/AssessmentForm";
-import { Dumbbell, ShieldCheck, Sparkles, Loader2, ChevronDown } from "lucide-react";
+import {
+  Sparkles, Loader2, ChevronDown, ChevronLeft, ChevronRight,
+  Apple, Plus, Pencil, Trash2, Clock, Utensils
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
-interface MacroBarProps {
-  label: string; current: number; target: number; color: string;
+interface MealItem {
+  food: string;
+  amount: string;
+  calories: number;
+  protein?: number;
 }
 
-const MacroBar = ({ label, current, target, color }: MacroBarProps) => {
-  const pct = Math.min((current / target) * 100, 100);
-  return (
-    <div className="space-y-2">
-      <div className="flex justify-between items-baseline">
-        <span className="text-sm font-semibold text-foreground">{label}</span>
-        <span className="text-xs text-muted-foreground">{current}g / {target}g</span>
-      </div>
-      <div className="h-2 bg-secondary rounded-full overflow-hidden">
-        <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, ease: "easeOut" }}
-          className="h-full rounded-full" style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}60` }} />
-      </div>
-    </div>
-  );
-};
+interface MealSlot {
+  mealName: string;
+  time: string;
+  items: MealItem[];
+}
 
 interface MealPlanDay {
   day: string;
   totalCalories: number;
-  meals: {
-    mealName: string;
-    time: string;
-    items: { food: string; amount: string; calories: number; protein?: number }[];
-  }[];
+  meals: MealSlot[];
+}
+
+interface ManualMeal {
+  id: string;
+  meal_time: string;
+  food_name: string;
+  calories: number;
+  protein: number;
 }
 
 interface NutritionDashboardProps {
@@ -42,14 +49,30 @@ interface NutritionDashboardProps {
   assessmentData?: AssessmentData | null;
 }
 
+const DAYS_HE = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+const DAYS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+const mealTimes = ["Breakfast", "Lunch", "Dinner", "Snack"];
+
 const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) => {
   const { t, lang } = useLang();
+
+  // AI plan state
   const [aiMealPlan, setAiMealPlan] = useState<MealPlanDay[] | null>(null);
   const [generatingPlan, setGeneratingPlan] = useState(false);
-  const [expandedDay, setExpandedDay] = useState<number | null>(null);
+  const [selectedDayIdx, setSelectedDayIdx] = useState(0);
+
+  // Manual meals state
+  const [meals, setMeals] = useState<ManualMeal[]>([]);
+  const [loadingMeals, setLoadingMeals] = useState(true);
+  const [editMeal, setEditMeal] = useState<ManualMeal | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [form, setForm] = useState({ food_name: "", calories: "", protein: "", meal_time: "Breakfast" });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadSavedPlan();
+    fetchManualMeals();
   }, []);
 
   const loadSavedPlan = async () => {
@@ -65,6 +88,15 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
       const planData = (data[0] as any).plan_data;
       if (planData.days) setAiMealPlan(planData.days);
     }
+  };
+
+  const fetchManualMeals = async () => {
+    const { data } = await supabase
+      .from("user_nutrition")
+      .select("*")
+      .order("created_at", { ascending: true });
+    if (data) setMeals(data as ManualMeal[]);
+    setLoadingMeals(false);
   };
 
   const generateAIMealPlan = async () => {
@@ -86,19 +118,20 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
           activityLevel: assessmentData.activityLevel,
           allergies: assessmentData.allergies?.join(", ") || "None",
           mealFrequency: assessmentData.mealFrequency || 4,
+          language: lang,
         },
       });
 
       if (error) throw error;
       if (data?.plan?.days) {
         setAiMealPlan(data.plan.days);
-        // Save to DB
+        setSelectedDayIdx(0);
         await supabase.from("ai_meal_plans").insert({
           user_id: user.id,
           plan_data: data.plan,
           goal: assessmentData.goal,
         });
-        toast({ title: "🍽️", description: "Your AI meal plan is ready!" });
+        toast({ title: "🍽️", description: t("nutrition.planReady") });
       }
     } catch (err: any) {
       toast({ title: t("nutritionPlan.error"), description: err.message, variant: "destructive" });
@@ -107,66 +140,104 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
     }
   };
 
-  if (!plan) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
-        <p className="text-muted-foreground text-center">{t("nutrition.noData")}</p>
-      </div>
-    );
-  }
+  // Manual meal CRUD
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      if (editMeal) {
+        const { error } = await supabase
+          .from("user_nutrition")
+          .update({
+            food_name: form.food_name,
+            calories: parseInt(form.calories) || 0,
+            protein: parseFloat(form.protein) || 0,
+            meal_time: form.meal_time,
+          })
+          .eq("id", editMeal.id);
+        if (error) throw error;
+        toast({ title: t("nutritionPlan.updated") });
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Not authenticated");
+        const { error } = await supabase
+          .from("user_nutrition")
+          .insert({
+            user_id: user.id,
+            food_name: form.food_name,
+            calories: parseInt(form.calories) || 0,
+            protein: parseFloat(form.protein) || 0,
+            meal_time: form.meal_time,
+          });
+        if (error) throw error;
+        toast({ title: t("nutritionPlan.added") });
+      }
+      setEditMeal(null);
+      setShowAdd(false);
+      setForm({ food_name: "", calories: "", protein: "", meal_time: "Breakfast" });
+      fetchManualMeals();
+    } catch (err: any) {
+      toast({ title: t("nutritionPlan.error"), description: err.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
 
-  const calPct = 0;
-  const macros = [
-    { label: t("nutrition.protein"), current: 0, target: plan.protein, color: "hsl(180, 80%, 50%)" },
-    { label: t("nutrition.carbs"), current: 0, target: plan.carbs, color: "hsl(270, 60%, 60%)" },
-    { label: t("nutrition.fat"), current: 0, target: plan.fat, color: "hsl(35, 90%, 55%)" },
-  ];
+  const handleDelete = async (id: string) => {
+    await supabase.from("user_nutrition").delete().eq("id", id);
+    toast({ title: t("nutritionPlan.deleted") });
+    fetchManualMeals();
+  };
+
+  const openEdit = (meal: ManualMeal) => {
+    setEditMeal(meal);
+    setForm({
+      food_name: meal.food_name,
+      calories: String(meal.calories),
+      protein: String(meal.protein),
+      meal_time: meal.meal_time,
+    });
+  };
+
+  const totalCals = meals.reduce((s, m) => s + m.calories, 0);
+  const totalProtein = meals.reduce((s, m) => s + m.protein, 0);
+  const dialogOpen = !!editMeal || showAdd;
+  const currentAiDay = aiMealPlan?.[selectedDayIdx];
+
+  // Get day label based on language
+  const getDayLabel = (day: MealPlanDay, idx: number) => {
+    if (lang === "he") return DAYS_HE[idx] || day.day;
+    return day.day;
+  };
+
+  // Get meal time color
+  const getMealColor = (mealName: string) => {
+    const lower = mealName.toLowerCase();
+    if (lower.includes("breakfast") || lower.includes("בוקר")) return "bg-cta-orange/15 text-cta-orange border-cta-orange/30";
+    if (lower.includes("lunch") || lower.includes("צהריים")) return "bg-primary/15 text-primary border-primary/30";
+    if (lower.includes("dinner") || lower.includes("ערב")) return "bg-accent/15 text-accent border-accent/30";
+    return "bg-cta-green/15 text-cta-green border-cta-green/30";
+  };
 
   return (
     <div className="px-5 pt-8 pb-28">
-      <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary mb-1">{t("nutrition.title")}</h1>
-      <p className="text-sm text-muted-foreground mb-4">{t("nutrition.dailyTargets")}</p>
-
-      {plan.summary && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="glass-card rounded-xl p-4 mb-6 border-l-4 border-accent">
-          <p className="text-sm text-foreground">{plan.summary}</p>
-        </motion.div>
-      )}
-
-      {/* Calorie ring */}
-      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-        className="glass-card rounded-2xl p-6 flex flex-col items-center mb-6">
-        <div className="relative w-40 h-40">
-          <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="52" fill="none" stroke="hsl(220, 14%, 18%)" strokeWidth="8" />
-            <motion.circle cx="60" cy="60" r="52" fill="none" stroke="hsl(180, 80%, 50%)" strokeWidth="8"
-              strokeLinecap="round" strokeDasharray={`${2 * Math.PI * 52}`}
-              initial={{ strokeDashoffset: 2 * Math.PI * 52 }}
-              animate={{ strokeDashoffset: 2 * Math.PI * 52 * (1 - calPct / 100) }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
-              style={{ filter: "drop-shadow(0 0 6px hsl(180 80% 50% / 0.5))" }} />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-display font-bold text-foreground">{plan.calories}</span>
-            <span className="text-xs text-muted-foreground">{t("nutrition.kcal")} target</span>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Macros */}
-      <div className="glass-card rounded-2xl p-5 space-y-5 mb-6">
-        <h2 className="text-xs font-display font-semibold tracking-[0.2em] uppercase text-muted-foreground">{t("nutrition.macros")}</h2>
-        {macros.map((m) => <MacroBar key={m.label} {...m} />)}
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-1">
+        <Apple className="w-5 h-5 text-primary" />
+        <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary">
+          {t("nutrition.title")}
+        </h1>
       </div>
+      <p className="text-sm text-muted-foreground mb-6">{t("nutrition.dailyTargets")}</p>
 
-      {/* AI Meal Plan Section */}
-      <div className="mb-6">
+      {/* ═══════════════════════════════════════════ */}
+      {/* AI WEEKLY MEAL PLAN - CALENDAR VIEW        */}
+      {/* ═══════════════════════════════════════════ */}
+      <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-cta-orange" />
             <h2 className="text-xs font-display font-semibold tracking-[0.2em] uppercase text-muted-foreground">
-              AI Weekly Meal Plan
+              {t("nutrition.weeklyPlan")}
             </h2>
           </div>
           <Button
@@ -176,84 +247,286 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
             className="h-8 text-xs bg-cta-orange hover:bg-cta-orange/90 text-black font-bold"
           >
             {generatingPlan ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Sparkles className="w-3 h-3 mr-1" />}
-            {generatingPlan ? t("assess.generating") : "Generate Plan"}
+            {generatingPlan ? t("assess.generating") : t("nutrition.generatePlan")}
           </Button>
         </div>
 
+        {/* Day selector row - weekly calendar tabs */}
         {aiMealPlan && (
-          <div className="space-y-2">
-            {aiMealPlan.map((day, dayIdx) => (
-              <motion.div
-                key={day.day}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: dayIdx * 0.05 }}
-                className="glass-card rounded-xl overflow-hidden"
-              >
-                <button
-                  onClick={() => setExpandedDay(expandedDay === dayIdx ? null : dayIdx)}
-                  className="w-full flex items-center justify-between p-4"
-                >
-                  <div>
-                    <p className="font-semibold text-foreground text-sm">{day.day}</p>
-                    <p className="text-xs text-muted-foreground">{day.totalCalories} kcal</p>
-                  </div>
-                  <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expandedDay === dayIdx ? "rotate-180" : ""}`} />
-                </button>
-
-                {expandedDay === dayIdx && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    className="px-4 pb-4 space-y-3"
+          <>
+            <div className="flex gap-1 mb-4 overflow-x-auto pb-1">
+              {aiMealPlan.map((day, i) => {
+                const shortLabel = lang === "he"
+                  ? (DAYS_HE[i] || day.day).slice(0, 3)
+                  : day.day.slice(0, 3);
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedDayIdx(i)}
+                    className={`flex-shrink-0 flex flex-col items-center px-3 py-2 rounded-xl text-xs font-display font-semibold tracking-wider transition-all duration-300 min-w-[48px] ${
+                      selectedDayIdx === i
+                        ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(180_80%_50%/0.4)]"
+                        : "bg-secondary text-muted-foreground hover:text-foreground"
+                    }`}
                   >
-                    {day.meals.map((meal, mealIdx) => (
-                      <div key={mealIdx} className="bg-secondary/30 rounded-lg p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-display font-semibold text-primary tracking-wider uppercase">{meal.mealName}</span>
-                          <span className="text-[10px] text-muted-foreground">{meal.time}</span>
+                    <span className="text-[10px]">{shortLabel}</span>
+                    <span className="text-[9px] mt-0.5 opacity-70">{day.totalCalories}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Selected day - full schedule */}
+            {currentAiDay && (
+              <motion.div
+                key={selectedDayIdx}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-3"
+              >
+                {/* Day header */}
+                <div className="glass-card rounded-xl p-4 flex items-center justify-between">
+                  <div>
+                    <p className="font-display font-bold text-foreground text-sm">
+                      {getDayLabel(currentAiDay, selectedDayIdx)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {currentAiDay.totalCalories} {t("nutrition.kcal")} {t("nutrition.total")}
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setSelectedDayIdx(Math.max(0, selectedDayIdx - 1))}
+                      disabled={selectedDayIdx === 0}
+                      className="p-1.5 rounded-lg hover:bg-secondary disabled:opacity-30 transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                    <button
+                      onClick={() => setSelectedDayIdx(Math.min((aiMealPlan?.length || 1) - 1, selectedDayIdx + 1))}
+                      disabled={selectedDayIdx === (aiMealPlan?.length || 1) - 1}
+                      className="p-1.5 rounded-lg hover:bg-secondary disabled:opacity-30 transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Meal schedule - timeline style */}
+                <div className="relative">
+                  {/* Timeline line */}
+                  <div className="absolute top-0 bottom-0 left-[22px] w-px bg-border" />
+
+                  {currentAiDay.meals.map((meal, mealIdx) => {
+                    const colorClass = getMealColor(meal.mealName);
+                    const mealCals = meal.items.reduce((s, it) => s + it.calories, 0);
+
+                    return (
+                      <motion.div
+                        key={mealIdx}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: mealIdx * 0.08 }}
+                        className="relative flex gap-3 mb-3"
+                      >
+                        {/* Timeline dot */}
+                        <div className="flex-shrink-0 w-[45px] flex flex-col items-center pt-3">
+                          <div className={`w-3 h-3 rounded-full border-2 z-10 ${colorClass}`} />
+                          <span className="text-[9px] text-muted-foreground mt-1 font-mono">{meal.time}</span>
                         </div>
-                        <div className="space-y-1">
-                          {meal.items.map((item, itemIdx) => (
-                            <div key={itemIdx} className="flex items-center justify-between text-xs">
-                              <span className="text-foreground">{item.food} <span className="text-muted-foreground">({item.amount})</span></span>
-                              <span className="text-muted-foreground">{item.calories} cal</span>
-                            </div>
-                          ))}
+
+                        {/* Meal card */}
+                        <div className="flex-1 glass-card rounded-xl p-3 overflow-hidden">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`text-[10px] font-display font-bold tracking-wider uppercase px-2 py-0.5 rounded-full border ${colorClass}`}>
+                              {meal.mealName}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground font-mono">
+                              {mealCals} {t("nutrition.kcal")}
+                            </span>
+                          </div>
+                          <div className="space-y-1">
+                            {meal.items.map((item, itemIdx) => (
+                              <div key={itemIdx} className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                  <Utensils className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
+                                  <span className="text-foreground truncate">{item.food}</span>
+                                </div>
+                                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                  <span className="text-[10px] text-muted-foreground">{item.amount}</span>
+                                  <span className="text-[10px] text-primary font-mono">{item.calories}cal</span>
+                                  {item.protein && (
+                                    <span className="text-[10px] text-cta-green font-mono">{item.protein}g</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </motion.div>
-                )}
+                      </motion.div>
+                    );
+                  })}
+                </div>
               </motion.div>
-            ))}
-          </div>
+            )}
+          </>
         )}
 
+        {/* Empty state */}
         {!aiMealPlan && !generatingPlan && (
           <div className="glass-card rounded-xl p-6 text-center">
             <Sparkles className="w-8 h-8 text-cta-orange/50 mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">
-              Generate a personalized AI meal plan with exact portions, calories, and timing for every day of the week.
+              {t("nutrition.emptyPlan")}
             </p>
+          </div>
+        )}
+
+        {/* Generating state */}
+        {generatingPlan && (
+          <div className="space-y-2">
+            {[0, 1, 2].map(i => (
+              <div key={i} className="glass-card rounded-xl p-4 animate-pulse">
+                <div className="h-3 bg-secondary rounded w-1/3 mb-2" />
+                <div className="h-2 bg-secondary rounded w-2/3 mb-1" />
+                <div className="h-2 bg-secondary rounded w-1/2" />
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: t("nutrition.water"), value: `${plan.water}L`, sub: "target" },
-          { label: t("nutrition.meals"), value: "—", sub: "today" },
-          { label: t("nutrition.fiber"), value: `${plan.fiber}g`, sub: "target" },
-        ].map((stat) => (
-          <div key={stat.label} className="glass-card rounded-xl p-3 text-center">
-            <p className="text-lg font-bold text-foreground">{stat.value}</p>
-            <p className="text-[10px] text-muted-foreground">{stat.sub}</p>
-            <p className="text-[10px] font-display tracking-wider text-primary uppercase mt-1">{stat.label}</p>
+      {/* ═══════════════════════════════════════════ */}
+      {/* MACROS OVERVIEW (if assessment done)       */}
+      {/* ═══════════════════════════════════════════ */}
+      {plan && (
+        <div className="glass-card rounded-2xl p-5 space-y-4 mb-8">
+          <h2 className="text-xs font-display font-semibold tracking-[0.2em] uppercase text-muted-foreground">
+            {t("nutrition.macros")}
+          </h2>
+          <div className="grid grid-cols-4 gap-2 text-center">
+            {[
+              { label: t("nutrition.kcal"), value: plan.calories, color: "text-primary" },
+              { label: t("nutrition.protein"), value: `${plan.protein}g`, color: "text-cta-green" },
+              { label: t("nutrition.carbs"), value: `${plan.carbs}g`, color: "text-accent" },
+              { label: t("nutrition.fat"), value: `${plan.fat}g`, color: "text-cta-orange" },
+            ].map(m => (
+              <div key={m.label}>
+                <p className={`text-lg font-display font-bold ${m.color}`}>{m.value}</p>
+                <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{m.label}</p>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* MANUAL MEAL TRACKING                       */}
+      {/* ═══════════════════════════════════════════ */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Utensils className="w-4 h-4 text-cta-green" />
+            <h2 className="text-xs font-display font-semibold tracking-[0.2em] uppercase text-muted-foreground">
+              {t("nutrition.manualLog")}
+            </h2>
+          </div>
+        </div>
+
+        {/* Summary */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="glass-card rounded-xl p-3 text-center">
+            <p className="text-xl font-bold text-foreground">{totalCals}</p>
+            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("nutritionPlan.totalCals")}</p>
+          </div>
+          <div className="glass-card rounded-xl p-3 text-center">
+            <p className="text-xl font-bold text-foreground">{totalProtein}g</p>
+            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("nutritionPlan.totalProtein")}</p>
+          </div>
+        </div>
+
+        <Button
+          onClick={() => { setShowAdd(true); setForm({ food_name: "", calories: "", protein: "", meal_time: "Breakfast" }); }}
+          className="w-full mb-4 bg-cta-green hover:bg-cta-green/90 text-black font-bold"
+        >
+          <Plus className="w-4 h-4" /> {t("nutritionPlan.addMeal")}
+        </Button>
+
+        {loadingMeals ? (
+          <div className="flex justify-center"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
+        ) : meals.length === 0 ? (
+          <p className="text-center text-muted-foreground text-sm">{t("nutritionPlan.empty")}</p>
+        ) : (
+          <div className="space-y-2">
+            {meals.map((meal, i) => (
+              <motion.div
+                key={meal.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.03 }}
+                className="glass-card rounded-xl p-3 flex items-center justify-between"
+              >
+                <div>
+                  <p className="font-semibold text-foreground text-sm">{meal.food_name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {meal.meal_time} • {meal.calories} kcal • {meal.protein}g {t("nutrition.protein")}
+                  </p>
+                </div>
+                <div className="flex gap-1.5">
+                  <button onClick={() => openEdit(meal)} className="text-primary hover:text-primary/80 p-1">
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => handleDelete(meal.id)} className="text-destructive hover:text-destructive/80 p-1">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) { setEditMeal(null); setShowAdd(false); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{editMeal ? t("nutritionPlan.editMeal") : t("nutritionPlan.addMeal")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Select value={form.meal_time} onValueChange={(v) => setForm({ ...form, meal_time: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {mealTimes.map(mt => (
+                  <SelectItem key={mt} value={mt}>{mt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              placeholder={t("nutritionPlan.foodName")}
+              value={form.food_name}
+              onChange={(e) => setForm({ ...form, food_name: e.target.value })}
+            />
+            <Input
+              type="number"
+              placeholder={t("nutritionPlan.calories")}
+              value={form.calories}
+              onChange={(e) => setForm({ ...form, calories: e.target.value })}
+            />
+            <Input
+              type="number"
+              placeholder={t("nutritionPlan.proteinG")}
+              value={form.protein}
+              onChange={(e) => setForm({ ...form, protein: e.target.value })}
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSave} disabled={saving || !form.food_name} className="bg-cta-green hover:bg-cta-green/90 text-black font-bold">
+              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+              {t("nutritionPlan.save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
