@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLang } from "@/contexts/LangContext";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 interface AuthPageProps {
   onAuth: () => void;
@@ -14,12 +15,13 @@ const PASSWORD_REGEX = /^(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).
 
 const AuthPage = ({ onAuth }: AuthPageProps) => {
   const { t } = useLang();
-  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "forgot" | "verify">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
 
   const getPasswordStrength = (pw: string) => {
     let score = 0;
@@ -36,6 +38,41 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
     if (s === 2) return { text: t("auth.medium"), color: "bg-yellow-500" };
     if (s === 3) return { text: t("auth.strong"), color: "bg-green-500" };
     return { text: t("auth.veryStrong"), color: "bg-emerald-400" };
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpCode.length !== 6) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpCode,
+        type: "signup",
+      });
+      if (error) throw error;
+      toast({ title: t("auth.verifySuccess"), description: t("auth.verifySuccessDesc") });
+      onAuth();
+    } catch (err: any) {
+      toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+      });
+      if (error) throw error;
+      toast({ title: t("auth.otpResent"), description: t("auth.otpResentDesc") });
+    } catch (err: any) {
+      toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,6 +92,7 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        onAuth();
       } else {
         if (!PASSWORD_REGEX.test(password)) {
           toast({ title: t("auth.error"), description: t("auth.passwordRequirements"), variant: "destructive" });
@@ -70,17 +108,79 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
           },
         });
         if (error) throw error;
-        toast({ title: t("auth.checkEmail"), description: t("auth.checkEmailDesc") });
-        setLoading(false);
-        return;
+        // Move to OTP verification screen
+        setMode("verify");
+        toast({ title: t("auth.checkEmail"), description: t("auth.otpSentDesc") });
       }
-      onAuth();
     } catch (err: any) {
       toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
+
+  // OTP Verification Screen
+  if (mode === "verify") {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6">
+        <div className="glass-card rounded-2xl p-8 w-full max-w-sm space-y-6">
+          <div className="text-center space-y-3">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <ShieldCheck className="w-8 h-8 text-primary" />
+            </div>
+            <h1 className="text-2xl font-display font-bold neon-text text-primary">FUELCORE</h1>
+            <p className="text-sm text-muted-foreground">{t("auth.otpTitle")}</p>
+            <p className="text-xs text-muted-foreground/70">{email}</p>
+          </div>
+
+          <div className="flex justify-center">
+            <InputOTP
+              maxLength={6}
+              value={otpCode}
+              onChange={(value) => setOtpCode(value)}
+            >
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
+          </div>
+
+          <Button
+            onClick={handleVerifyOtp}
+            className="w-full bg-cta-green hover:bg-cta-green/90 text-black font-bold"
+            disabled={loading || otpCode.length !== 6}
+          >
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {t("auth.verifyCode")}
+          </Button>
+
+          <div className="text-center space-y-2">
+            <p className="text-xs text-muted-foreground">{t("auth.noCodeReceived")}</p>
+            <button
+              onClick={handleResendOtp}
+              disabled={loading}
+              className="text-xs text-primary hover:underline"
+            >
+              {t("auth.resendCode")}
+            </button>
+            <div>
+              <button
+                onClick={() => { setMode("signup"); setOtpCode(""); }}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                ← {t("auth.backToSignup")}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
