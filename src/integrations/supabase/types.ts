@@ -14,7 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      articles: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          link: string | null
+          title: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      exercises: {
+        Row: {
+          created_at: string
+          id: string
+          instructions: string | null
+          muscle_group: string
+          title: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          instructions?: string | null
+          muscle_group: string
+          title: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          instructions?: string | null
+          muscle_group?: string
+          title?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      user_nutrition: {
+        Row: {
+          calories: number
+          created_at: string
+          food_name: string
+          id: string
+          meal_time: string
+          protein: number
+          user_id: string
+        }
+        Insert: {
+          calories?: number
+          created_at?: string
+          food_name: string
+          id?: string
+          meal_time?: string
+          protein?: number
+          user_id: string
+        }
+        Update: {
+          calories?: number
+          created_at?: string
+          food_name?: string
+          id?: string
+          meal_time?: string
+          protein?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_progress_photos: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
