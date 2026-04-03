@@ -103,24 +103,30 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
   };
 
   const generateAIMealPlan = async () => {
-    if (!assessmentData) {
-      toast({ title: t("nutritionPlan.error"), description: t("nutrition.noData"), variant: "destructive" });
-      return;
-    }
     setGeneratingPlan(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      const defaults = {
+        goal: "maintenance",
+        weight: 75,
+        height: 175,
+        age: 30,
+        activityLevel: "3",
+        allergies: "None",
+        mealFrequency: 4,
+      };
+
       const { data, error } = await supabase.functions.invoke("generate-meal-plan", {
         body: {
-          goal: assessmentData.goal,
-          weight: assessmentData.weight,
-          height: assessmentData.height,
-          age: assessmentData.age,
-          activityLevel: assessmentData.activityLevel,
-          allergies: assessmentData.allergies?.join(", ") || "None",
-          mealFrequency: assessmentData.mealFrequency || 4,
+          goal: assessmentData?.goal || defaults.goal,
+          weight: assessmentData?.weight || defaults.weight,
+          height: assessmentData?.height || defaults.height,
+          age: assessmentData?.age || defaults.age,
+          activityLevel: assessmentData?.activityLevel || defaults.activityLevel,
+          allergies: assessmentData?.allergies?.join(", ") || defaults.allergies,
+          mealFrequency: assessmentData?.mealFrequency || defaults.mealFrequency,
           language: lang,
         },
       });
@@ -132,7 +138,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
         await supabase.from("ai_meal_plans").insert({
           user_id: user.id,
           plan_data: data.plan,
-          goal: assessmentData.goal,
+          goal: assessmentData?.goal || "maintenance",
         });
         toast({ title: "🍽️", description: t("nutrition.planReady") });
       }
