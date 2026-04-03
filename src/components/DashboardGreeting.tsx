@@ -5,14 +5,22 @@ import { motion } from "framer-motion";
 
 const DashboardGreeting = () => {
   const { t } = useLang();
-  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
   const [completionPercent, setCompletionPercent] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      setEmail(user.email || "");
+
+      // Fetch first name from profiles
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("first_name")
+        .eq("id", user.id)
+        .single();
+
+      setFirstName(profile?.first_name || user.email?.split("@")[0] || "");
 
       // Calculate daily completion based on meals logged today
       const today = new Date().toISOString().split("T")[0];
@@ -22,7 +30,6 @@ const DashboardGreeting = () => {
         .eq("user_id", user.id)
         .gte("created_at", today);
       
-      // Assume 4 meals = 100%
       const percent = Math.min(100, Math.round(((count || 0) / 4) * 100));
       setCompletionPercent(percent);
     };
@@ -36,7 +43,6 @@ const DashboardGreeting = () => {
     return t("dashboard.evening");
   };
 
-  const displayName = email.split("@")[0];
   const radius = 40;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (completionPercent / 100) * circumference;
@@ -47,21 +53,12 @@ const DashboardGreeting = () => {
       animate={{ opacity: 1, y: 0 }}
       className="glass-card rounded-2xl p-5 mx-5 mt-4 flex items-center gap-5"
     >
-      {/* Progress Ring */}
       <div className="relative flex-shrink-0">
         <svg width="96" height="96" viewBox="0 0 96 96">
-          <circle
-            cx="48" cy="48" r={radius}
-            fill="none"
-            stroke="hsl(var(--secondary))"
-            strokeWidth="6"
-          />
+          <circle cx="48" cy="48" r={radius} fill="none" stroke="hsl(var(--secondary))" strokeWidth="6" />
           <motion.circle
             cx="48" cy="48" r={radius}
-            fill="none"
-            stroke="hsl(var(--primary))"
-            strokeWidth="6"
-            strokeLinecap="round"
+            fill="none" stroke="hsl(var(--primary))" strokeWidth="6" strokeLinecap="round"
             strokeDasharray={circumference}
             initial={{ strokeDashoffset: circumference }}
             animate={{ strokeDashoffset }}
@@ -75,11 +72,10 @@ const DashboardGreeting = () => {
         </div>
       </div>
 
-      {/* Greeting Text */}
       <div>
         <p className="text-sm text-muted-foreground">{getGreeting()}</p>
         <h2 className="text-xl font-display font-bold text-foreground capitalize">
-          {displayName}
+          {firstName || "..."}
         </h2>
         <p className="text-xs text-muted-foreground mt-1">{t("dashboard.completion")}</p>
       </div>

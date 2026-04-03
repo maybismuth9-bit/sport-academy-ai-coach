@@ -65,6 +65,24 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          first_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          first_name?: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          first_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
       user_nutrition: {
         Row: {
           calories: number
