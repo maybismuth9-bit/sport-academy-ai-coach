@@ -158,6 +158,8 @@ const translations: Translations = {
   "workout.planReady": { en: "Your workout plan is ready!", he: "תוכנית האימון שלכם מוכנה!", es: "¡Tu plan está listo!", zh: "你的训练计划准备好了！", ar: "خطة تمرينك جاهزة!", de: "Dein Trainingsplan ist fertig!" },
   "workout.regenerate": { en: "New Plan", he: "תוכנית חדשה", es: "Nuevo plan", zh: "新计划", ar: "خطة جديدة", de: "Neuer Plan" },
   "workout.replacing": { en: "Finding replacement exercise...", he: "מחפש תרגיל חלופי...", es: "Buscando reemplazo...", zh: "正在寻找替代训练...", ar: "البحث عن تمرين بديل...", de: "Ersatzübung wird gesucht..." },
+  "workout.exerciseInfo": { en: "Exercise details", he: "פרטי תרגיל", es: "Detalles del ejercicio", zh: "练习详情", ar: "تفاصيل التمرين", de: "Übungsdetails" },
+  "workout.tips": { en: "Pro Tips", he: "טיפים מקצועיים", es: "Consejos pro", zh: "专业提示", ar: "نصائح احترافية", de: "Profi-Tipps" },
   "workout.lastUsed": { en: "Last", he: "אחרון", es: "Último", zh: "上次", ar: "السابق", de: "Zuletzt" },
   "workout.logPerformance": { en: "Log Performance", he: "רשמו ביצועים", es: "Registrar rendimiento", zh: "记录表现", ar: "سجل الأداء", de: "Leistung protokollieren" },
   "workout.weightKg": { en: "Weight (kg)", he: 'משקל (ק"ג)', es: "Peso (kg)", zh: "重量(kg)", ar: "الوزن (كغ)", de: "Gewicht (kg)" },
