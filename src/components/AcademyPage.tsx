@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, ExternalLink, Brain, ChevronDown, Heart } from "lucide-react";
+import { BookOpen, ExternalLink, Brain, ChevronDown, Heart, Sparkles, Loader2 } from "lucide-react";
 import { useLang } from "@/contexts/LangContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Article {
   id: number;
   titleKey: string;
-  summaryKey: string;
   category: string;
   source: string;
   sourceUrl: string;
@@ -14,11 +14,11 @@ interface Article {
 }
 
 const articles: Article[] = [
-  { id: 1, titleKey: "academy.article1.title", summaryKey: "academy.article1.summary", category: "Strength", source: "PubMed", sourceUrl: "https://pubmed.ncbi.nlm.nih.gov", readTime: "3 min" },
-  { id: 2, titleKey: "academy.article2.title", summaryKey: "academy.article2.summary", category: "Nutrition", source: "Meta-Analysis", sourceUrl: "https://pubmed.ncbi.nlm.nih.gov", readTime: "4 min" },
-  { id: 3, titleKey: "academy.article3.title", summaryKey: "academy.article3.summary", category: "Recovery", source: "NSCA Journal", sourceUrl: "https://journals.lww.com/nsca-jscr", readTime: "3 min" },
-  { id: 4, titleKey: "academy.article4.title", summaryKey: "academy.article4.summary", category: "Physiology", source: "PubMed", sourceUrl: "https://pubmed.ncbi.nlm.nih.gov", readTime: "5 min" },
-  { id: 5, titleKey: "academy.article5.title", summaryKey: "academy.article5.summary", category: "Performance", source: "Sports Medicine", sourceUrl: "https://link.springer.com/journal/40279", readTime: "4 min" },
+  { id: 1, titleKey: "academy.article1.title", category: "Strength", source: "PubMed", sourceUrl: "https://pubmed.ncbi.nlm.nih.gov", readTime: "3 min" },
+  { id: 2, titleKey: "academy.article2.title", category: "Nutrition", source: "Meta-Analysis", sourceUrl: "https://pubmed.ncbi.nlm.nih.gov", readTime: "4 min" },
+  { id: 3, titleKey: "academy.article3.title", category: "Recovery", source: "NSCA Journal", sourceUrl: "https://journals.lww.com/nsca-jscr", readTime: "3 min" },
+  { id: 4, titleKey: "academy.article4.title", category: "Physiology", source: "PubMed", sourceUrl: "https://pubmed.ncbi.nlm.nih.gov", readTime: "5 min" },
+  { id: 5, titleKey: "academy.article5.title", category: "Performance", source: "Sports Medicine", sourceUrl: "https://link.springer.com/journal/40279", readTime: "4 min" },
 ];
 
 const physioExercises = [
@@ -46,15 +46,59 @@ const categoryColors: Record<string, string> = {
 };
 
 const AcademyPage = () => {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"articles" | "physio">("articles");
   const [physioFilter, setPhysioFilter] = useState<string>("All");
+  const [aiSummaries, setAiSummaries] = useState<Record<number, string>>({});
+  const [loadingSummary, setLoadingSummary] = useState<number | null>(null);
 
   const physioCategories = ["All", "Shoulder", "Back", "Knee", "Hip"];
-  const filteredPhysio = physioFilter === "All" 
-    ? physioExercises 
+  const filteredPhysio = physioFilter === "All"
+    ? physioExercises
     : physioExercises.filter(e => e.category === physioFilter);
+
+  const fetchAiSummary = useCallback(async (article: Article) => {
+    // Check cache first
+    const cacheKey = `fuelcore_summary_${article.id}_${lang}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      setAiSummaries(prev => ({ ...prev, [article.id]: cached }));
+      return;
+    }
+
+    setLoadingSummary(article.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-article-summary", {
+        body: {
+          title: t(article.titleKey),
+          sourceUrl: article.sourceUrl,
+          language: lang,
+        },
+      });
+
+      if (error) throw error;
+      const summary = data?.summary || t("academy.summaryError");
+      setAiSummaries(prev => ({ ...prev, [article.id]: summary }));
+      sessionStorage.setItem(cacheKey, summary);
+    } catch (err) {
+      console.error("Failed to generate summary:", err);
+      setAiSummaries(prev => ({ ...prev, [article.id]: t("academy.summaryError") }));
+    } finally {
+      setLoadingSummary(null);
+    }
+  }, [lang, t]);
+
+  const handleArticleToggle = (article: Article) => {
+    if (expandedId === article.id) {
+      setExpandedId(null);
+    } else {
+      setExpandedId(article.id);
+      if (!aiSummaries[article.id]) {
+        fetchAiSummary(article);
+      }
+    }
+  };
 
   return (
     <div className="px-5 pt-8 pb-28">
@@ -96,8 +140,8 @@ const AcademyPage = () => {
         {activeTab === "articles" ? (
           <motion.div key="articles" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
             <div className="flex items-center gap-2 mb-5 glass-card rounded-xl p-3">
-              <Brain className="w-4 h-4 text-accent flex-shrink-0" />
-              <p className="text-xs text-muted-foreground">{t("academy.aiNote")}</p>
+              <Sparkles className="w-4 h-4 text-cta-orange flex-shrink-0" />
+              <p className="text-xs text-muted-foreground">{t("academy.aiSummaryNote")}</p>
             </div>
 
             <div className="space-y-3">
@@ -110,7 +154,7 @@ const AcademyPage = () => {
                   className="glass-card rounded-xl overflow-hidden"
                 >
                   <button
-                    onClick={() => setExpandedId(expandedId === article.id ? null : article.id)}
+                    onClick={() => handleArticleToggle(article)}
                     className="w-full text-left p-4"
                   >
                     <div className="flex items-center justify-between">
@@ -135,9 +179,24 @@ const AcademyPage = () => {
                         exit={{ height: 0, opacity: 0 }}
                         className="px-4 pb-4"
                       >
-                        <p className="text-sm text-muted-foreground mb-3 leading-relaxed line-clamp-5">
-                          {t(article.summaryKey)}
-                        </p>
+                        {loadingSummary === article.id ? (
+                          <div className="flex items-center gap-2 py-4">
+                            <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                            <span className="text-xs text-muted-foreground">{t("academy.generatingSummary")}</span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <Sparkles className="w-3 h-3 text-cta-orange" />
+                              <span className="text-[10px] font-display font-semibold text-cta-orange tracking-wider uppercase">
+                                {t("academy.aiSummary")}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+                              {aiSummaries[article.id] || ""}
+                            </p>
+                          </>
+                        )}
                         <a
                           href={article.sourceUrl}
                           target="_blank"
@@ -156,7 +215,6 @@ const AcademyPage = () => {
           </motion.div>
         ) : (
           <motion.div key="physio" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            {/* Physio category filter */}
             <div className="flex gap-1.5 mb-5 overflow-x-auto pb-1">
               {physioCategories.map((cat) => (
                 <button
@@ -183,11 +241,9 @@ const AcademyPage = () => {
                   className="glass-card rounded-xl p-4"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <span className={`text-[10px] font-display font-semibold tracking-widest uppercase px-2 py-0.5 rounded-full ${categoryColors[ex.category]}`}>
-                        {ex.category}
-                      </span>
-                    </div>
+                    <span className={`text-[10px] font-display font-semibold tracking-widest uppercase px-2 py-0.5 rounded-full ${categoryColors[ex.category]}`}>
+                      {ex.category}
+                    </span>
                     <span className="text-[10px] text-muted-foreground">{t(ex.durationKey)}</span>
                   </div>
                   <h3 className="font-semibold text-foreground text-sm mt-2">{t(ex.titleKey)}</h3>
