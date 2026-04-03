@@ -83,7 +83,16 @@
   }
 
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border;
-    box-shadow: var(--card-shadow);
+    @apply bg-card/60 backdrop-blur-2xl border border-white/[0.06];
+    box-shadow: var(--card-shadow), inset 0 1px 0 0 hsl(0 0% 100% / 0.04);
   }
+
+  .animate-pulse-neon {
+    animation: pulseNeon 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulseNeon {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }

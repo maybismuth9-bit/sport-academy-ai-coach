@@ -178,6 +178,26 @@ const translations: Translations = {
   "recovery.hip.drill1": { en: "90/90 Hip Stretch", he: "מתיחת ירך 90/90" },
   "recovery.hip.drill2": { en: "Pigeon Pose", he: "תנוחת יונה" },
 
+  // Landing
+  "landing.tagline": { en: "AI-Powered Personal Training & Nutrition", he: "אימון אישי ותזונה מבוססי AI" },
+  "landing.cta": { en: "Get Started Free", he: "להתחיל בחינם" },
+  "landing.limitedPilot": { en: "🔥 Limited time — free pilot program!", he: "🔥 לזמן מוגבל — תוכנית פיילוט בחינם!" },
+  "landing.feat1.title": { en: "AI Plans", he: "תוכניות AI" },
+  "landing.feat1.desc": { en: "Personalized workout & nutrition", he: "אימון ותזונה מותאמים אישית" },
+  "landing.feat2.title": { en: "Gym Scanner", he: "סורק חדר כושר" },
+  "landing.feat2.desc": { en: "Scan equipment, get exercises", he: "סרקו ציוד, קבלו תרגילים" },
+  "landing.feat3.title": { en: "Meal Tracker", he: "מעקב ארוחות" },
+  "landing.feat3.desc": { en: "Log meals, track macros", he: "רשמו ארוחות, עקבו אחר מאקרו" },
+  "landing.feat4.title": { en: "Progress", he: "התקדמות" },
+  "landing.feat4.desc": { en: "Photos & analytics", he: "תמונות ואנליטיקס" },
+  "landing.socialProof": { en: "Trusted by athletes & fitness enthusiasts", he: "מהימן על ידי ספורטאים וחובבי כושר" },
+
+  // Dashboard
+  "dashboard.morning": { en: "Good morning,", he: "בוקר טוב," },
+  "dashboard.afternoon": { en: "Good afternoon,", he: "צהריים טובים," },
+  "dashboard.evening": { en: "Good evening,", he: "ערב טוב," },
+  "dashboard.completion": { en: "Today's completion", he: "השלמה יומית" },
+
   // Auth
   "auth.login": { en: "Log In", he: "התחברות" },
   "auth.signup": { en: "Sign Up", he: "הרשמה" },
