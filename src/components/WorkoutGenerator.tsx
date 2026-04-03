@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload, Camera, Dumbbell, Zap, Edit3, Save, BarChart3, TrendingUp,
-  Trash2, RefreshCw, ChevronUp, ChevronDown, Loader2, CheckCircle2, ArrowRight, Info
+  Trash2, RefreshCw, ChevronUp, ChevronDown, Loader2, CheckCircle2, ArrowRight, Info, MoreVertical
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,9 @@ import { useLang } from "@/contexts/LangContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Exercise {
   name: string;
@@ -403,10 +406,23 @@ const WorkoutGenerator = () => {
         <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary">
           {t("workout.title")}
         </h1>
-        <button onClick={resetPlan} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-          <RefreshCw className="w-3 h-3" />
-          {t("workout.regenerate")}
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-2 rounded-lg hover:bg-secondary transition-colors">
+              <MoreVertical className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={resetPlan} className="gap-2">
+              <RefreshCw className="w-3.5 h-3.5" />
+              {t("workout.regenerate")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setPlan(null); localStorage.removeItem("fuelcore_workout_plan"); setStep("questionnaire"); }} className="gap-2 text-destructive focus:text-destructive">
+              <Trash2 className="w-3.5 h-3.5" />
+              {t("workout.deletePlan")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <p className="text-sm text-muted-foreground mb-6">{t("workout.subtitle")}</p>
 

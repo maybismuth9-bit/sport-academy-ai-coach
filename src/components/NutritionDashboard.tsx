@@ -6,7 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { NutritionPlan, AssessmentData } from "@/components/AssessmentForm";
 import {
   Sparkles, Loader2, ChevronDown, ChevronLeft, ChevronRight,
-  Apple, Plus, Pencil, Trash2, Clock, Utensils
+  Apple, Plus, Pencil, Trash2, Clock, Utensils, MoreVertical, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,9 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface MealItem {
   food: string;
@@ -240,15 +243,38 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
               {t("nutrition.weeklyPlan")}
             </h2>
           </div>
-          <Button
-            onClick={generateAIMealPlan}
-            disabled={generatingPlan}
-            size="sm"
-            className="h-8 text-xs bg-cta-orange hover:bg-cta-orange/90 text-black font-bold"
-          >
-            {generatingPlan ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Sparkles className="w-3 h-3 mr-1" />}
-            {generatingPlan ? t("assess.generating") : t("nutrition.generatePlan")}
-          </Button>
+          <div className="flex items-center gap-2">
+            {!aiMealPlan && (
+              <Button
+                onClick={generateAIMealPlan}
+                disabled={generatingPlan}
+                size="sm"
+                className="h-8 text-xs bg-cta-orange hover:bg-cta-orange/90 text-black font-bold"
+              >
+                {generatingPlan ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                {generatingPlan ? t("assess.generating") : t("nutrition.generatePlan")}
+              </Button>
+            )}
+            {aiMealPlan && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-2 rounded-lg hover:bg-secondary transition-colors">
+                    <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={generateAIMealPlan} disabled={generatingPlan} className="gap-2">
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    {t("nutrition.replacePlan")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setAiMealPlan(null); }} className="gap-2 text-destructive focus:text-destructive">
+                    <Trash2 className="w-3.5 h-3.5" />
+                    {t("nutrition.deletePlan")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
 
         {/* Day selector row - weekly calendar tabs */}

@@ -14,14 +14,14 @@ interface Article {
 }
 
 const articles: Article[] = [
-  { id: 1, titleKey: "academy.article1.title", categoryKey: "academy.cat.strength", source: "PubMed", sourceUrl: "https://pubmed.ncbi.nlm.nih.gov", readTime: "3 min" },
-  { id: 2, titleKey: "academy.article2.title", categoryKey: "academy.cat.nutrition", source: "Meta-Analysis", sourceUrl: "https://pubmed.ncbi.nlm.nih.gov", readTime: "4 min" },
-  { id: 3, titleKey: "academy.article3.title", categoryKey: "academy.cat.recovery", source: "NSCA Journal", sourceUrl: "https://journals.lww.com/nsca-jscr", readTime: "3 min" },
-  { id: 4, titleKey: "academy.article4.title", categoryKey: "academy.cat.physiology", source: "PubMed", sourceUrl: "https://pubmed.ncbi.nlm.nih.gov", readTime: "5 min" },
-  { id: 5, titleKey: "academy.article5.title", categoryKey: "academy.cat.performance", source: "Sports Medicine", sourceUrl: "https://link.springer.com/journal/40279", readTime: "4 min" },
-  { id: 6, titleKey: "academy.article6.title", categoryKey: "academy.cat.nutrition", source: "JISSN", sourceUrl: "https://jissn.biomedcentral.com", readTime: "5 min" },
-  { id: 7, titleKey: "academy.article7.title", categoryKey: "academy.cat.strength", source: "NSCA", sourceUrl: "https://journals.lww.com/nsca-jscr", readTime: "4 min" },
-  { id: 8, titleKey: "academy.article8.title", categoryKey: "academy.cat.recovery", source: "Sports Medicine", sourceUrl: "https://link.springer.com/journal/40279", readTime: "3 min" },
+  { id: 1, titleKey: "academy.article1.title", categoryKey: "academy.cat.strength", source: "PubMed", sourceUrl: "https://pubmed.ncbi.nlm.nih.gov/28934897/", readTime: "3 min" },
+  { id: 2, titleKey: "academy.article2.title", categoryKey: "academy.cat.nutrition", source: "JISSN Meta-Analysis", sourceUrl: "https://jissn.biomedcentral.com/articles/10.1186/s12970-018-0215-1", readTime: "4 min" },
+  { id: 3, titleKey: "academy.article3.title", categoryKey: "academy.cat.recovery", source: "Sports Medicine", sourceUrl: "https://link.springer.com/article/10.1007/s40279-017-0832-x", readTime: "3 min" },
+  { id: 4, titleKey: "academy.article4.title", categoryKey: "academy.cat.physiology", source: "JISSN Review", sourceUrl: "https://jissn.biomedcentral.com/articles/10.1186/s12970-017-0173-z", readTime: "5 min" },
+  { id: 5, titleKey: "academy.article5.title", categoryKey: "academy.cat.performance", source: "British J. Sports Med.", sourceUrl: "https://bjsm.bmj.com/content/53/10/655", readTime: "4 min" },
+  { id: 6, titleKey: "academy.article6.title", categoryKey: "academy.cat.nutrition", source: "NEJM Review", sourceUrl: "https://www.nejm.org/doi/full/10.1056/NEJMra1905136", readTime: "5 min" },
+  { id: 7, titleKey: "academy.article7.title", categoryKey: "academy.cat.strength", source: "Sports Medicine", sourceUrl: "https://link.springer.com/article/10.1007/s40279-021-01460-7", readTime: "4 min" },
+  { id: 8, titleKey: "academy.article8.title", categoryKey: "academy.cat.recovery", source: "PLoS ONE", sourceUrl: "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0251735", readTime: "3 min" },
 ];
 
 const categoryColorMap: Record<string, string> = {
@@ -142,7 +142,7 @@ const AcademyPage = () => {
                           {t("academy.aiSummary")}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+                      <p className="text-sm text-muted-foreground mb-3 leading-relaxed whitespace-pre-line min-h-[5lh]">
                         {aiSummaries[article.id] || ""}
                       </p>
                     </>
