@@ -19,6 +19,8 @@ interface Exercise {
   reps: string;
   rest: string;
   weight?: string;
+  description?: string;
+  tips?: string[];
 }
 
 interface DayPlan {
