@@ -6,7 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { NutritionPlan, AssessmentData } from "@/components/AssessmentForm";
 import {
   Sparkles, Loader2, ChevronDown, ChevronLeft, ChevronRight,
-  Apple, Plus, Pencil, Trash2, Clock, Utensils
+  Apple, Plus, Pencil, Trash2, Clock, Utensils, MoreVertical, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
