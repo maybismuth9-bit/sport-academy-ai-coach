@@ -18,16 +18,14 @@ serve(async (req) => {
     };
     const targetLang = langMap[language] || "English";
 
-    const systemPrompt = `You are a certified sports nutritionist. Generate a complete weekly meal plan (7 days, Sunday through Saturday) based on the user's data. Each day must include meals with exact food items, amounts in grams, and calories. All meal names, food names, and day names must be in ${targetLang}. Include specific times for each meal (e.g. "07:00", "10:30", "13:00"). Format as structured JSON via the tool call.`;
+    const systemPrompt = `You are a sports nutritionist. Generate a 7-day meal plan as JSON. All text in ${targetLang}. Be concise - use short food names. Return ONLY valid JSON, no markdown.`;
 
-    const userPrompt = `Create a weekly meal plan for:
-- Goal: ${goal}
-- Weight: ${weight}kg, Height: ${height}cm, Age: ${age}
-- Activity level: ${activityLevel}/5
-- Allergies: ${allergies || "None"}
-- Meals per day: ${mealFrequency}
+    const userPrompt = `Goal: ${goal}, ${weight}kg, ${height}cm, age ${age}, activity ${activityLevel}/5, allergies: ${allergies || "None"}, ${mealFrequency} meals/day.
 
-Generate a 7-day plan with ${mealFrequency} meals per day. Each meal must include: meal name (Breakfast/Lunch/Dinner/Snack), food items with amounts in grams, calories per item, and total daily calories.`;
+Return this exact JSON structure:
+{"days":[{"day":"<day name>","totalCalories":<number>,"meals":[{"mealName":"<meal>","time":"<HH:MM>","items":[{"food":"<name>","amount":"<grams>","calories":<n>,"protein":<n>}]}]}],"weeklyAvgCalories":<number>}
+
+Generate all 7 days (Sunday-Saturday). Keep food names short.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -36,63 +34,11 @@ Generate a 7-day plan with ${mealFrequency} meals per day. Each meal must includ
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "provide_meal_plan",
-            description: "Provide the weekly meal plan",
-            parameters: {
-              type: "object",
-              properties: {
-                days: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      day: { type: "string", description: "Day name (Sunday-Saturday)" },
-                      totalCalories: { type: "number" },
-                      meals: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            mealName: { type: "string" },
-                            time: { type: "string" },
-                            items: {
-                              type: "array",
-                              items: {
-                                type: "object",
-                                properties: {
-                                  food: { type: "string" },
-                                  amount: { type: "string" },
-                                  calories: { type: "number" },
-                                  protein: { type: "number" }
-                                },
-                                required: ["food", "amount", "calories"]
-                              }
-                            }
-                          },
-                          required: ["mealName", "time", "items"]
-                        }
-                      }
-                    },
-                    required: ["day", "totalCalories", "meals"]
-                  }
-                },
-                weeklyAvgCalories: { type: "number" },
-                summary: { type: "string" }
-              },
-              required: ["days", "weeklyAvgCalories", "summary"],
-              additionalProperties: false,
-            },
-          },
-        }],
-        tool_choice: { type: "function", function: { name: "provide_meal_plan" } },
       }),
     });
 
@@ -115,17 +61,22 @@ Generate a 7-day plan with ${mealFrequency} meals per day. Each meal must includ
     }
 
     const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    if (toolCall?.function?.arguments) {
-      const mealPlan = JSON.parse(toolCall.function.arguments);
+    let content = data.choices?.[0]?.message?.content || "";
+    
+    // Strip markdown code fences if present
+    content = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+    
+    try {
+      const mealPlan = JSON.parse(content);
       return new Response(JSON.stringify({ plan: mealPlan }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    } catch (parseErr) {
+      console.error("JSON parse error:", parseErr, "Content:", content.slice(0, 500));
+      return new Response(JSON.stringify({ error: "Failed to parse meal plan" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
-
-    return new Response(JSON.stringify({ error: "Failed to generate meal plan" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
   } catch (e) {
     console.error("Error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
