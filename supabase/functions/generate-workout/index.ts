@@ -39,7 +39,7 @@ ${weightContext}
 For each training day, provide:
 - A day label (Day A, Day B, etc.)
 - A focus description
-- 4-5 exercises, each with: name, muscle group, sets (number), reps (string like "8-10"), rest time, and suggested starting weight in kg
+- 4-5 exercises, each with: name, muscle group, sets (number), reps (string like "8-10"), rest time, suggested starting weight in kg, a detailed description (2-3 sentences explaining proper form and technique), and 2-3 practical tips
 
 Return ONLY valid JSON in this exact format:
 {
@@ -54,14 +54,16 @@ Return ONLY valid JSON in this exact format:
           "sets": 4,
           "reps": "8-10",
           "rest": "90s",
-          "weight": "60kg"
+          "weight": "60kg",
+          "description": "Lie flat on the bench with feet firmly on the floor. Grip the bar slightly wider than shoulder-width, lower it to mid-chest, then press up explosively while keeping your shoulder blades retracted.",
+          "tips": ["Keep your wrists straight and aligned with your forearms", "Breathe in on the way down, exhale on the press", "Don't bounce the bar off your chest"]
         }
       ]
     }
   ]
 }
 
-Important: Exercise names should be in ${targetLang}. Focus descriptions should be in ${targetLang}. Keep muscle group names short.`;
+Important: Exercise names, descriptions, tips, and focus descriptions should all be in ${targetLang}. Keep muscle group names short.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
