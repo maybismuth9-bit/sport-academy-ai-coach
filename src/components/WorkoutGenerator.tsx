@@ -500,6 +500,13 @@ const WorkoutGenerator = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <button
+                            onClick={() => setExpandedExercise(expandedExercise === ex.name ? null : ex.name)}
+                            className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
+                            title={t("workout.exerciseInfo")}
+                          >
+                            <Info className="w-3.5 h-3.5 text-primary" />
+                          </button>
+                          <button
                             onClick={() => setEditingExercise(editingExercise === ex.name ? null : ex.name)}
                             className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
                           >
@@ -539,6 +546,35 @@ const WorkoutGenerator = () => {
                         )}
                       </div>
                     </div>
+
+                    {/* Exercise Details Panel */}
+                    <AnimatePresence>
+                      {expandedExercise === ex.name && (ex.description || ex.tips) && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="border-t border-border px-4 py-3 bg-primary/5"
+                        >
+                          {ex.description && (
+                            <p className="text-xs text-foreground leading-relaxed mb-2">{ex.description}</p>
+                          )}
+                          {ex.tips && ex.tips.length > 0 && (
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-display font-semibold text-primary tracking-wider uppercase mb-1">
+                                {t("workout.tips")}
+                              </p>
+                              {ex.tips.map((tip, ti) => (
+                                <div key={ti} className="flex items-start gap-1.5">
+                                  <span className="text-primary text-[10px] mt-0.5">•</span>
+                                  <p className="text-[11px] text-muted-foreground leading-snug">{tip}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
                     {/* Performance Tracking Panel */}
                     <AnimatePresence>
