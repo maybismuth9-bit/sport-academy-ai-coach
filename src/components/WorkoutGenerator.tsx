@@ -66,6 +66,7 @@ const WorkoutGenerator = () => {
 
   // Tracking state
   const [editingExercise, setEditingExercise] = useState<string | null>(null);
+  const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
   const [logValues, setLogValues] = useState<Record<string, { sets: string; reps: string; weight: string }>>({});
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
   const [showGraph, setShowGraph] = useState(false);
