@@ -9,11 +9,16 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { goal, weight, height, age, activityLevel, allergies, mealFrequency } = await req.json();
+    const { goal, weight, height, age, activityLevel, allergies, mealFrequency, language } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are a certified sports nutritionist. Generate a complete weekly meal plan (7 days) based on the user's data. Each day must include meals with exact food items, amounts in grams, and calories. Format as a structured JSON via the tool call.`;
+    const langMap: Record<string, string> = {
+      en: "English", he: "Hebrew", es: "Spanish", zh: "Chinese", ar: "Arabic", de: "German",
+    };
+    const targetLang = langMap[language] || "English";
+
+    const systemPrompt = `You are a certified sports nutritionist. Generate a complete weekly meal plan (7 days, Sunday through Saturday) based on the user's data. Each day must include meals with exact food items, amounts in grams, and calories. All meal names, food names, and day names must be in ${targetLang}. Include specific times for each meal (e.g. "07:00", "10:30", "13:00"). Format as structured JSON via the tool call.`;
 
     const userPrompt = `Create a weekly meal plan for:
 - Goal: ${goal}
