@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Camera, Dumbbell, Zap, Play, Edit3, ChevronUp, Save, BarChart3, TrendingUp } from "lucide-react";
+import {
+  Upload, Camera, Dumbbell, Zap, Edit3, Save, BarChart3, TrendingUp,
+  Trash2, RefreshCw, ChevronUp, Loader2, CheckCircle2, ArrowRight
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,68 +19,13 @@ interface Exercise {
   reps: string;
   rest: string;
   weight?: string;
-  suggestedIncrease?: string;
 }
 
 interface DayPlan {
   label: string;
-  dayKey: string;
   focus: string;
   exercises: Exercise[];
 }
-
-const trainingDays: DayPlan[] = [
-  {
-    label: "Day 1", dayKey: "workout.day.sun", focus: "Push (Chest/Shoulders/Triceps)",
-    exercises: [
-      { name: "Barbell Bench Press", muscle: "Chest", sets: 4, reps: "8-10", rest: "90s", weight: "60kg", suggestedIncrease: "+2.5kg" },
-      { name: "Overhead Press", muscle: "Shoulders", sets: 3, reps: "10-12", rest: "60s", weight: "35kg", suggestedIncrease: "+2.5kg" },
-      { name: "Incline DB Press", muscle: "Upper Chest", sets: 3, reps: "10-12", rest: "60s", weight: "22kg" },
-      { name: "Tricep Pushdown", muscle: "Triceps", sets: 3, reps: "12-15", rest: "45s", weight: "25kg" },
-    ],
-  },
-  {
-    label: "Day 2", dayKey: "workout.day.mon", focus: "Pull (Back/Biceps)",
-    exercises: [
-      { name: "Deadlift", muscle: "Full Back", sets: 4, reps: "6-8", rest: "120s", weight: "100kg", suggestedIncrease: "+5kg" },
-      { name: "Weighted Pull-Ups", muscle: "Lats", sets: 4, reps: "8-10", rest: "90s", weight: "+10kg" },
-      { name: "Seated Row", muscle: "Rhomboids", sets: 3, reps: "10-12", rest: "60s", weight: "50kg" },
-      { name: "Barbell Curl", muscle: "Biceps", sets: 3, reps: "10-12", rest: "45s", weight: "25kg" },
-    ],
-  },
-  {
-    label: "Day 3", dayKey: "workout.day.wed", focus: "Legs & Core",
-    exercises: [
-      { name: "Barbell Squat", muscle: "Quads/Glutes", sets: 4, reps: "8-10", rest: "120s", weight: "80kg", suggestedIncrease: "+5kg" },
-      { name: "Romanian Deadlift", muscle: "Hamstrings", sets: 3, reps: "10-12", rest: "90s", weight: "60kg" },
-      { name: "Leg Press", muscle: "Quads", sets: 3, reps: "12-15", rest: "60s", weight: "120kg" },
-      { name: "Hanging Leg Raise", muscle: "Core", sets: 3, reps: "12-15", rest: "45s" },
-    ],
-  },
-  {
-    label: "Day 4", dayKey: "workout.day.thu", focus: "Upper Body (Hypertrophy)",
-    exercises: [
-      { name: "Cable Chest Fly", muscle: "Chest", sets: 3, reps: "12-15", rest: "60s", weight: "15kg" },
-      { name: "Lat Pulldown", muscle: "Lats", sets: 3, reps: "10-12", rest: "60s", weight: "55kg" },
-      { name: "Lateral Raise", muscle: "Delts", sets: 3, reps: "15-20", rest: "45s", weight: "10kg" },
-      { name: "Face Pulls", muscle: "Rear Delts", sets: 3, reps: "15-20", rest: "45s", weight: "20kg" },
-    ],
-  },
-  {
-    label: "Free", dayKey: "workout.day.sat", focus: "Full Body / Weak Points",
-    exercises: [
-      { name: "Front Squat", muscle: "Quads/Core", sets: 3, reps: "8-10", rest: "90s", weight: "50kg" },
-      { name: "Dumbbell Row", muscle: "Back", sets: 3, reps: "10-12", rest: "60s", weight: "30kg" },
-      { name: "Push-Ups", muscle: "Chest/Triceps", sets: 3, reps: "To failure", rest: "60s" },
-    ],
-  },
-];
-
-const aiExercises = [
-  { name: "Lat Pulldown", muscle: "Back — Lats", reps: "4 × 10-12" },
-  { name: "Cable Chest Fly", muscle: "Chest — Pectorals", reps: "3 × 12-15" },
-  { name: "Seated Row", muscle: "Back — Rhomboids", reps: "3 × 10-12" },
-];
 
 interface WorkoutLog {
   exercise_name: string;
@@ -87,21 +35,50 @@ interface WorkoutLog {
   logged_at: string;
 }
 
+type FlowStep = "questionnaire" | "photos" | "generating" | "plan";
+
+const FOCUS_OPTIONS = [
+  { key: "chest", label: "Chest" },
+  { key: "back", label: "Back" },
+  { key: "shoulders", label: "Shoulders" },
+  { key: "legs", label: "Legs" },
+  { key: "arms", label: "Arms" },
+  { key: "core", label: "Core" },
+  { key: "fullbody", label: "Full Body" },
+];
+
 const WorkoutGenerator = () => {
-  const { t } = useLang();
+  const { t, lang } = useLang();
+
+  // Flow state
+  const [step, setStep] = useState<FlowStep>("questionnaire");
+  const [daysPerWeek, setDaysPerWeek] = useState(3);
+  const [selectedFocus, setSelectedFocus] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>([]);
+  const [skipPhotos, setSkipPhotos] = useState(false);
+
+  // Plan state
+  const [plan, setPlan] = useState<DayPlan[] | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
+  const [replacingExercise, setReplacingExercise] = useState<string | null>(null);
+
+  // Tracking state
   const [editingExercise, setEditingExercise] = useState<string | null>(null);
   const [logValues, setLogValues] = useState<Record<string, { sets: string; reps: string; weight: string }>>({});
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
   const [showGraph, setShowGraph] = useState(false);
   const [savingLog, setSavingLog] = useState<string | null>(null);
 
-  // Gym scanner state
-  const [images, setImages] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [scanWorkout, setScanWorkout] = useState<typeof aiExercises | null>(null);
-
+  // Load saved plan and logs
   useEffect(() => {
+    const saved = localStorage.getItem("fuelcore_workout_plan");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setPlan(parsed);
+        setStep("plan");
+      } catch { /* ignore */ }
+    }
     fetchLogs();
   }, []);
 
@@ -116,10 +93,91 @@ const WorkoutGenerator = () => {
     if (data) setWorkoutLogs(data as WorkoutLog[]);
   };
 
+  // Build previous weights map from logs
+  const getPreviousWeights = useCallback(() => {
+    const weights: Record<string, number> = {};
+    workoutLogs.forEach(log => {
+      if (log.weight > 0) weights[log.exercise_name] = log.weight;
+    });
+    return weights;
+  }, [workoutLogs]);
+
+  // Get last logged weight for an exercise
+  const getLastWeight = (exerciseName: string): number | null => {
+    const logs = workoutLogs.filter(l => l.exercise_name === exerciseName && l.weight > 0);
+    if (logs.length === 0) return null;
+    return logs[logs.length - 1].weight;
+  };
+
+  const generatePlan = async () => {
+    setStep("generating");
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-workout", {
+        body: {
+          daysPerWeek,
+          focusAreas: selectedFocus.length > 0 ? selectedFocus : ["Full Body"],
+          equipment: images.length > 0 ? ["gym photos uploaded"] : [],
+          language: lang,
+          previousWeights: getPreviousWeights(),
+        },
+      });
+
+      if (error) throw error;
+      if (!data?.days) throw new Error("Invalid plan format");
+
+      setPlan(data.days);
+      localStorage.setItem("fuelcore_workout_plan", JSON.stringify(data.days));
+      setSelectedDay(0);
+      setStep("plan");
+      toast({ title: "💪", description: t("workout.planReady") });
+    } catch (err: any) {
+      console.error("Generate workout error:", err);
+      toast({ title: t("nutritionPlan.error"), description: err.message, variant: "destructive" });
+      setStep("questionnaire");
+    }
+  };
+
+  const deleteExercise = async (dayIdx: number, exIdx: number) => {
+    if (!plan) return;
+    const updated = [...plan];
+    const day = { ...updated[dayIdx], exercises: [...updated[dayIdx].exercises] };
+
+    // Replace with AI
+    setReplacingExercise(day.exercises[exIdx].name);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-workout", {
+        body: {
+          daysPerWeek: 1,
+          focusAreas: [day.focus],
+          language: lang,
+          previousWeights: getPreviousWeights(),
+        },
+      });
+
+      if (error) throw error;
+      const newExercise = data?.days?.[0]?.exercises?.find(
+        (e: Exercise) => !day.exercises.some(ex => ex.name === e.name)
+      );
+
+      if (newExercise) {
+        day.exercises[exIdx] = newExercise;
+      } else {
+        day.exercises.splice(exIdx, 1);
+      }
+    } catch {
+      day.exercises.splice(exIdx, 1);
+    }
+
+    updated[dayIdx] = day;
+    setPlan(updated);
+    localStorage.setItem("fuelcore_workout_plan", JSON.stringify(updated));
+    setReplacingExercise(null);
+  };
+
   const saveLog = async (exerciseName: string, dayLabel: string) => {
     const vals = logValues[exerciseName];
     if (!vals?.sets && !vals?.reps && !vals?.weight) return;
-    
+
     setSavingLog(exerciseName);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -144,7 +202,6 @@ const WorkoutGenerator = () => {
     setSavingLog(null);
   };
 
-  // Build graph data from logs
   const getGraphData = () => {
     if (workoutLogs.length === 0) return [];
     const byDate: Record<string, number> = {};
@@ -166,201 +223,105 @@ const WorkoutGenerator = () => {
     });
   };
 
-  const generateWorkout = () => {
-    setLoading(true);
-    setScanWorkout(null);
-    setTimeout(() => { setScanWorkout(aiExercises); setLoading(false); }, 2500);
+  const resetPlan = () => {
+    setPlan(null);
+    setStep("questionnaire");
+    setImages([]);
+    setSelectedFocus([]);
+    setSkipPhotos(false);
+    localStorage.removeItem("fuelcore_workout_plan");
   };
 
-  const day = trainingDays[selectedDay];
+  const toggleFocus = (key: string) => {
+    setSelectedFocus(prev =>
+      prev.includes(key) ? prev.filter(f => f !== key) : [...prev, key]
+    );
+  };
+
   const graphData = getGraphData();
+  const currentDay = plan?.[selectedDay];
 
-  return (
-    <div className="px-5 pt-8 pb-28">
-      <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary mb-1">{t("workout.title")}</h1>
-      <p className="text-sm text-muted-foreground mb-6">{t("workout.subtitle")}</p>
+  // ─── QUESTIONNAIRE STEP ───
+  if (step === "questionnaire") {
+    return (
+      <div className="px-5 pt-8 pb-28">
+        <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary mb-1">
+          {t("workout.title")}
+        </h1>
+        <p className="text-sm text-muted-foreground mb-6">{t("workout.setupDesc")}</p>
 
-      {/* Performance Graph Toggle */}
-      {graphData.length > 0 && (
-        <div className="mb-6">
-          <button
-            onClick={() => setShowGraph(!showGraph)}
-            className="flex items-center gap-2 text-xs font-display font-semibold tracking-wider text-primary mb-3"
-          >
-            <BarChart3 className="w-4 h-4" />
-            {showGraph ? "Hide" : "Show"} Performance Graph
-            <TrendingUp className="w-3 h-3" />
-          </button>
-          <AnimatePresence>
-            {showGraph && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="glass-card rounded-xl p-4"
+        {/* Days per week */}
+        <div className="glass-card rounded-xl p-5 mb-5">
+          <p className="text-sm font-semibold text-foreground mb-3">{t("workout.howManyDays")}</p>
+          <div className="flex gap-2">
+            {[2, 3, 4, 5, 6].map(n => (
+              <button
+                key={n}
+                onClick={() => setDaysPerWeek(n)}
+                className={`flex-1 py-3 rounded-lg text-sm font-display font-bold transition-all ${
+                  daysPerWeek === n
+                    ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(180_80%_50%/0.4)]"
+                    : "bg-secondary text-muted-foreground"
+                }`}
               >
-                <ResponsiveContainer width="100%" height={180}>
-                  <LineChart data={graphData}>
-                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                    <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-                    <Tooltip
-                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: 12 }}
-                    />
-                    <Line type="monotone" dataKey="volume" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--primary))" }} />
-                  </LineChart>
-                </ResponsiveContainer>
-                <p className="text-[10px] text-muted-foreground text-center mt-2">Total Volume (weight × sets × reps)</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                {n}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
 
-      {/* Training Day Selector */}
-      <div className="flex gap-1.5 mb-6 overflow-x-auto pb-2">
-        {trainingDays.map((d, i) => (
-          <button
-            key={i}
-            onClick={() => setSelectedDay(i)}
-            className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-display font-semibold tracking-wider transition-all duration-300 ${
-              selectedDay === i
-                ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(180_80%_50%/0.4)]"
-                : "bg-secondary text-muted-foreground hover:text-foreground"
-            }`}
+        {/* Focus areas */}
+        <div className="glass-card rounded-xl p-5 mb-5">
+          <p className="text-sm font-semibold text-foreground mb-3">{t("workout.focusAreas")}</p>
+          <div className="flex flex-wrap gap-2">
+            {FOCUS_OPTIONS.map(opt => (
+              <button
+                key={opt.key}
+                onClick={() => toggleFocus(opt.key)}
+                className={`px-3 py-2 rounded-full text-xs font-display font-semibold tracking-wider transition-all ${
+                  selectedFocus.includes(opt.key)
+                    ? "bg-cta-orange text-black"
+                    : "bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t(`workout.focus.${opt.key}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Next: photos or skip */}
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setStep("photos")}
+            className="flex-1 h-12 bg-primary text-primary-foreground font-display font-semibold tracking-wider"
           >
-            {d.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Day Focus */}
-      <div className="glass-card rounded-xl p-4 mb-5">
-        <p className="text-sm font-semibold text-foreground">{day.focus}</p>
-      </div>
-
-      {/* Exercise Cards with Performance Tracking */}
-      {day.exercises.length > 0 && (
-        <div className="space-y-3 mb-8">
-          {day.exercises.map((ex, i) => (
-            <motion.div
-              key={`${selectedDay}-${ex.name}`}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              className="glass-card rounded-xl overflow-hidden"
-            >
-              <div className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="font-semibold text-foreground text-sm">{ex.name}</p>
-                    <p className="text-xs text-muted-foreground">{ex.muscle}</p>
-                  </div>
-                  <button
-                    onClick={() => setEditingExercise(editingExercise === ex.name ? null : ex.name)}
-                    className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
-                  >
-                    <Edit3 className="w-3.5 h-3.5 text-muted-foreground" />
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-3 text-xs">
-                  <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full font-display">
-                    {ex.sets} {t("workout.sets")}
-                  </span>
-                  <span className="bg-accent/10 text-accent px-2 py-0.5 rounded-full font-display">
-                    {ex.reps} {t("workout.reps")}
-                  </span>
-                  <span className="text-muted-foreground">{ex.rest} {t("workout.rest")}</span>
-                </div>
-
-                {ex.weight && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-xs text-foreground font-medium">{ex.weight}</span>
-                    {ex.suggestedIncrease && (
-                      <span className="inline-flex items-center gap-0.5 text-[10px] text-cta-green bg-cta-green/10 px-1.5 py-0.5 rounded-full">
-                        <ChevronUp className="w-3 h-3" />
-                        {ex.suggestedIncrease}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                <div className="mt-3 w-full h-20 bg-background/50 rounded-lg border border-border flex items-center justify-center">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Play className="w-4 h-4" />
-                    <span className="text-[10px]">{t("workout.videoPlaceholder")}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Performance Tracking Panel */}
-              <AnimatePresence>
-                {editingExercise === ex.name && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="border-t border-border p-4 bg-secondary/30"
-                  >
-                    <p className="text-xs font-display font-semibold text-muted-foreground mb-3 tracking-wider uppercase">
-                      Log Performance
-                    </p>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div>
-                        <label className="text-[10px] text-muted-foreground">{t("workout.sets")}</label>
-                        <Input
-                          type="number"
-                          className="h-8 text-xs bg-background border-border"
-                          placeholder={String(ex.sets)}
-                          value={logValues[ex.name]?.sets || ""}
-                          onChange={(e) => setLogValues(prev => ({ ...prev, [ex.name]: { ...prev[ex.name], sets: e.target.value, reps: prev[ex.name]?.reps || "", weight: prev[ex.name]?.weight || "" } }))}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-muted-foreground">{t("workout.reps")}</label>
-                        <Input
-                          type="number"
-                          className="h-8 text-xs bg-background border-border"
-                          placeholder={ex.reps.split("-")[0]}
-                          value={logValues[ex.name]?.reps || ""}
-                          onChange={(e) => setLogValues(prev => ({ ...prev, [ex.name]: { ...prev[ex.name], reps: e.target.value, sets: prev[ex.name]?.sets || "", weight: prev[ex.name]?.weight || "" } }))}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-muted-foreground">Weight</label>
-                        <Input
-                          type="number"
-                          className="h-8 text-xs bg-background border-border"
-                          placeholder={ex.weight?.replace("kg", "") || "0"}
-                          value={logValues[ex.name]?.weight || ""}
-                          onChange={(e) => setLogValues(prev => ({ ...prev, [ex.name]: { ...prev[ex.name], weight: e.target.value, sets: prev[ex.name]?.sets || "", reps: prev[ex.name]?.reps || "" } }))}
-                        />
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => saveLog(ex.name, day.label)}
-                      disabled={savingLog === ex.name}
-                      className="w-full mt-3 h-8 text-xs bg-cta-green hover:bg-cta-green/90 text-black font-bold"
-                    >
-                      <Save className="w-3 h-3 mr-1" />
-                      {t("nutritionPlan.save")}
-                    </Button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
+            <Camera className="w-4 h-4 mr-2" />
+            {t("workout.uploadPhotos")}
+          </Button>
+          <Button
+            onClick={() => { setSkipPhotos(true); generatePlan(); }}
+            variant="outline"
+            className="flex-1 h-12 font-display font-semibold tracking-wider border-primary/30"
+          >
+            <Zap className="w-4 h-4 mr-2" />
+            {t("workout.skipToAi")}
+          </Button>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Gym Scanner */}
-      <div className="border-t border-border pt-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Camera className="w-4 h-4 text-primary" />
-          <h2 className="text-xs font-display font-semibold tracking-[0.2em] uppercase text-muted-foreground">{t("workout.scanGym")}</h2>
-        </div>
+  // ─── PHOTOS STEP ───
+  if (step === "photos") {
+    return (
+      <div className="px-5 pt-8 pb-28">
+        <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary mb-1">
+          {t("workout.scanGym")}
+        </h1>
+        <p className="text-sm text-muted-foreground mb-6">{t("workout.uploadHint")}</p>
 
-        <label className="block cursor-pointer">
+        <label className="block cursor-pointer mb-5">
           <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
           <div className={`glass-card rounded-2xl border-2 border-dashed transition-all ${images.length > 0 ? "border-primary/30" : "border-border hover:border-primary/40"}`}>
             {images.length > 0 ? (
@@ -380,49 +341,273 @@ const WorkoutGenerator = () => {
                   <Upload className="w-5 h-5 text-primary" />
                 </div>
                 <span className="text-sm text-muted-foreground">{t("workout.upload")}</span>
-                <span className="text-xs text-muted-foreground/60">{t("workout.uploadHint")}</span>
               </div>
             )}
           </div>
         </label>
 
-        {images.length > 0 && !scanWorkout && !loading && (
-          <Button onClick={generateWorkout} className="w-full mt-4 h-12 bg-primary text-primary-foreground font-display font-semibold tracking-wider">
-            <Zap className="w-4 h-4 mr-2" /> {t("workout.generate")}
-          </Button>
-        )}
+        <Button
+          onClick={generatePlan}
+          disabled={images.length === 0}
+          className="w-full h-12 bg-cta-green hover:bg-cta-green/90 text-black font-display font-bold tracking-wider"
+        >
+          <Zap className="w-4 h-4 mr-2" />
+          {t("workout.generate")}
+        </Button>
 
-        {loading && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 space-y-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Dumbbell className="w-4 h-4 text-primary animate-pulse" />
-              <p className="text-sm text-primary font-display tracking-wider animate-pulse">{t("workout.aiIdentifying")}</p>
-            </div>
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="glass-card rounded-xl p-4 space-y-2">
-                <Skeleton className="h-4 w-2/3" />
-                <Skeleton className="h-3 w-1/3" />
-              </div>
-            ))}
-          </motion.div>
-        )}
-
-        {scanWorkout && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 space-y-3">
-            <h2 className="text-xs font-display font-semibold tracking-[0.2em] uppercase text-muted-foreground mb-4">{t("workout.suggested")}</h2>
-            {scanWorkout.map((ex, i) => (
-              <motion.div key={ex.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-                className="glass-card rounded-xl p-4 flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-foreground">{ex.name}</p>
-                  <p className="text-xs text-muted-foreground">{ex.muscle}</p>
-                </div>
-                <span className="text-xs font-display text-primary bg-primary/10 px-3 py-1 rounded-full">{ex.reps}</span>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+        <button
+          onClick={() => setStep("questionnaire")}
+          className="w-full mt-3 text-xs text-muted-foreground hover:text-foreground text-center"
+        >
+          ← {t("workout.back")}
+        </button>
       </div>
+    );
+  }
+
+  // ─── GENERATING STEP ───
+  if (step === "generating") {
+    return (
+      <div className="px-5 pt-8 pb-28">
+        <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary mb-1">
+          {t("workout.title")}
+        </h1>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-10 space-y-4">
+          <div className="flex items-center gap-3 justify-center mb-6">
+            <Loader2 className="w-6 h-6 text-primary animate-spin" />
+            <p className="text-sm text-primary font-display tracking-wider animate-pulse">
+              {t("workout.aiGenerating")}
+            </p>
+          </div>
+          {Array.from({ length: daysPerWeek }).map((_, i) => (
+            <div key={i} className="glass-card rounded-xl p-4 space-y-3">
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-3 w-2/3" />
+              <div className="space-y-2">
+                {[1, 2, 3].map(j => <Skeleton key={j} className="h-3 w-full" />)}
+              </div>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ─── PLAN VIEW ───
+  return (
+    <div className="px-5 pt-8 pb-28">
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary">
+          {t("workout.title")}
+        </h1>
+        <button onClick={resetPlan} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+          <RefreshCw className="w-3 h-3" />
+          {t("workout.regenerate")}
+        </button>
+      </div>
+      <p className="text-sm text-muted-foreground mb-6">{t("workout.subtitle")}</p>
+
+      {/* Performance Graph */}
+      {graphData.length > 0 && (
+        <div className="mb-6">
+          <button
+            onClick={() => setShowGraph(!showGraph)}
+            className="flex items-center gap-2 text-xs font-display font-semibold tracking-wider text-primary mb-3"
+          >
+            <BarChart3 className="w-4 h-4" />
+            {showGraph ? t("workout.hideGraph") : t("workout.showGraph")}
+            <TrendingUp className="w-3 h-3" />
+          </button>
+          <AnimatePresence>
+            {showGraph && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="glass-card rounded-xl p-4"
+              >
+                <ResponsiveContainer width="100%" height={180}>
+                  <LineChart data={graphData}>
+                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                    <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", fontSize: 12 }} />
+                    <Line type="monotone" dataKey="volume" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3, fill: "hsl(var(--primary))" }} />
+                  </LineChart>
+                </ResponsiveContainer>
+                <p className="text-[10px] text-muted-foreground text-center mt-2">Total Volume (weight × sets × reps)</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Day Selector */}
+      {plan && (
+        <div className="flex gap-1.5 mb-6 overflow-x-auto pb-2">
+          {plan.map((d, i) => (
+            <button
+              key={i}
+              onClick={() => setSelectedDay(i)}
+              className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-display font-semibold tracking-wider transition-all duration-300 ${
+                selectedDay === i
+                  ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(180_80%_50%/0.4)]"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {d.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Day Focus */}
+      {currentDay && (
+        <div className="glass-card rounded-xl p-4 mb-5">
+          <p className="text-sm font-semibold text-foreground">{currentDay.focus}</p>
+        </div>
+      )}
+
+      {/* Exercises */}
+      {currentDay && (
+        <div className="space-y-3">
+          {currentDay.exercises.map((ex, i) => {
+            const lastWeight = getLastWeight(ex.name);
+            const isReplacing = replacingExercise === ex.name;
+
+            return (
+              <motion.div
+                key={`${selectedDay}-${ex.name}-${i}`}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06 }}
+                className="glass-card rounded-xl overflow-hidden"
+              >
+                {isReplacing ? (
+                  <div className="p-4 flex items-center gap-3">
+                    <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                    <span className="text-xs text-muted-foreground">{t("workout.replacing")}</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <p className="font-semibold text-foreground text-sm">{ex.name}</p>
+                          <p className="text-xs text-muted-foreground">{ex.muscle}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => setEditingExercise(editingExercise === ex.name ? null : ex.name)}
+                            className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
+                          >
+                            <Edit3 className="w-3.5 h-3.5 text-muted-foreground" />
+                          </button>
+                          <button
+                            onClick={() => deleteExercise(selectedDay, i)}
+                            className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-destructive/60 hover:text-destructive" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full font-display">
+                          {ex.sets} {t("workout.sets")}
+                        </span>
+                        <span className="bg-accent/10 text-accent px-2 py-0.5 rounded-full font-display">
+                          {ex.reps} {t("workout.reps")}
+                        </span>
+                        <span className="text-muted-foreground">{ex.rest} {t("workout.rest")}</span>
+                      </div>
+
+                      {/* Weight display with memory */}
+                      <div className="flex items-center gap-2 mt-2">
+                        {ex.weight && (
+                          <span className="text-xs text-foreground font-medium">
+                            {t("workout.suggested")}: {ex.weight}
+                          </span>
+                        )}
+                        {lastWeight !== null && (
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-cta-green bg-cta-green/10 px-1.5 py-0.5 rounded-full">
+                            <CheckCircle2 className="w-3 h-3" />
+                            {t("workout.lastUsed")}: {lastWeight}kg
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Performance Tracking Panel */}
+                    <AnimatePresence>
+                      {editingExercise === ex.name && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="border-t border-border p-4 bg-secondary/30"
+                        >
+                          <p className="text-xs font-display font-semibold text-muted-foreground mb-3 tracking-wider uppercase">
+                            {t("workout.logPerformance")}
+                          </p>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div>
+                              <label className="text-[10px] text-muted-foreground">{t("workout.sets")}</label>
+                              <Input
+                                type="number"
+                                className="h-8 text-xs bg-background border-border"
+                                placeholder={String(ex.sets)}
+                                value={logValues[ex.name]?.sets || ""}
+                                onChange={(e) => setLogValues(prev => ({
+                                  ...prev,
+                                  [ex.name]: { sets: e.target.value, reps: prev[ex.name]?.reps || "", weight: prev[ex.name]?.weight || "" }
+                                }))}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-muted-foreground">{t("workout.reps")}</label>
+                              <Input
+                                type="number"
+                                className="h-8 text-xs bg-background border-border"
+                                placeholder={ex.reps.split("-")[0]}
+                                value={logValues[ex.name]?.reps || ""}
+                                onChange={(e) => setLogValues(prev => ({
+                                  ...prev,
+                                  [ex.name]: { reps: e.target.value, sets: prev[ex.name]?.sets || "", weight: prev[ex.name]?.weight || "" }
+                                }))}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-muted-foreground">{t("workout.weightKg")}</label>
+                              <Input
+                                type="number"
+                                className="h-8 text-xs bg-background border-border"
+                                placeholder={lastWeight ? String(lastWeight) : ex.weight?.replace("kg", "") || "0"}
+                                value={logValues[ex.name]?.weight || ""}
+                                onChange={(e) => setLogValues(prev => ({
+                                  ...prev,
+                                  [ex.name]: { weight: e.target.value, sets: prev[ex.name]?.sets || "", reps: prev[ex.name]?.reps || "" }
+                                }))}
+                              />
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => saveLog(ex.name, currentDay.label)}
+                            disabled={savingLog === ex.name}
+                            className="w-full mt-3 h-8 text-xs bg-cta-green hover:bg-cta-green/90 text-black font-bold"
+                          >
+                            <Save className="w-3 h-3 mr-1" />
+                            {t("nutritionPlan.save")}
+                          </Button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
