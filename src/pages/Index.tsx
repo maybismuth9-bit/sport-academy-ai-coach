@@ -11,6 +11,7 @@ import ProgressTracker from "@/components/ProgressTracker";
 import DailyWorkout from "@/components/DailyWorkout";
 import NutritionPlanPage from "@/components/NutritionPlanPage";
 import KnowledgeHub from "@/components/KnowledgeHub";
+import PhysioPage from "@/components/PhysioPage";
 import AuthPage from "@/components/AuthPage";
 import WeeklyPhotoReminder from "@/components/WeeklyPhotoReminder";
 import LandingPage from "@/components/LandingPage";
@@ -124,7 +125,7 @@ const AppContent = () => {
       {page === "academy" && <AcademyPage />}
       {page === "workout" && <WorkoutGenerator />}
       {page === "nutrition" && <NutritionDashboard plan={nutritionPlan} assessmentData={assessmentData} />}
-      {page === "recovery" && <RecoveryPage />}
+      {page === "recovery" && <PhysioPage />}
       {page === "progress" && <ProgressTracker />}
       {page === "dailyWorkout" && <DailyWorkout />}
       {page === "nutritionPlan" && <NutritionPlanPage />}

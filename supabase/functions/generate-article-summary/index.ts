@@ -35,11 +35,11 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a professional fitness & sports science writer. Generate a concise, informative 4-5 line summary of the given article. Write in ${targetLang}. The summary should be engaging, evidence-based, and accessible to fitness enthusiasts. Do NOT include the title in the summary. Return ONLY the summary text, no formatting or labels.`,
+            content: `You are a professional fitness & sports science writer. Generate an informative summary of at least 5 lines (5-7 sentences) about the given article. Write in ${targetLang}. The summary should be engaging, evidence-based, and accessible to fitness enthusiasts. Cover key findings, practical applications, and important takeaways. Do NOT include the title in the summary. Return ONLY the summary text, no formatting or labels.`,
           },
           {
             role: "user",
-            content: `Article title: "${title}"${sourceUrl ? `\nSource: ${sourceUrl}` : ""}\n\nGenerate a professional 4-5 line summary of this sports science / fitness article.`,
+            content: `Article title: "${title}"${sourceUrl ? `\nSource: ${sourceUrl}` : ""}\n\nGenerate a professional 5-7 sentence summary of this sports science / fitness article. Include key research findings, practical takeaways, and actionable advice.`,
           },
         ],
       }),
