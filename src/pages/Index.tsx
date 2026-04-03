@@ -129,6 +129,7 @@ const AppContent = () => {
       {page === "dailyWorkout" && <DailyWorkout />}
       {page === "nutritionPlan" && <NutritionPlanPage />}
       {page === "knowledgeHub" && <KnowledgeHub />}
+      <WeeklyPhotoReminder />
       <BottomNav active={page} onNavigate={setPage} />
     </div>
   );
