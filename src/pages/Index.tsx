@@ -113,7 +113,7 @@ const AppContent = () => {
       {/* Personalized greeting on home */}
       {page === "home" && <DashboardGreeting />}
 
-      {page === "home" && <HomeFeed onStartAssessment={() => setPage("assessment")} />}
+      {page === "home" && <HomeFeed onStartAssessment={() => setPage("assessment")} onNavigate={setPage} />}
       {page === "assessment" && (
         <AssessmentForm onComplete={(data, plan) => {
           setAssessmentData(data);
