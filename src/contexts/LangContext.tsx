@@ -205,6 +205,8 @@ const translations: Translations = {
   "nutrition.planReady": { en: "Your weekly meal plan is ready!", he: "תפריט השבועי שלך מוכן!", es: "¡Tu menú semanal está listo!", zh: "你的每周菜单准备好了!", ar: "قائمة طعامك الأسبوعية جاهزة!", de: "Dein Wochenmenü ist fertig!" },
   "nutrition.emptyPlan": { en: "Generate a personalized AI meal plan with exact portions, calories, and timing for every day of the week.", he: "צרו תפריט תזונה אישי עם מנות מדויקות, קלוריות ותזמון לכל יום בשבוע.", es: "Genera un plan de comidas personalizado con porciones exactas, calorías y horarios.", zh: "生成个性化AI餐计划，包含每天的精确份量、热量和时间。", ar: "أنشئ خطة وجبات مخصصة بكميات دقيقة وسعرات حرارية وتوقيت.", de: "Erstelle einen personalisierten AI-Ernährungsplan mit genauen Portionen, Kalorien und Zeiten." },
   "nutrition.total": { en: "total", he: "סה״כ", es: "total", zh: "总计", ar: "المجموع", de: "gesamt" },
+  "nutrition.replacePlan": { en: "Replace Plan", he: "החלף תפריט", es: "Reemplazar menú", zh: "替换菜单", ar: "استبدال القائمة", de: "Menü ersetzen" },
+  "nutrition.deletePlan": { en: "Delete Plan", he: "מחק תפריט", es: "Eliminar menú", zh: "删除菜单", ar: "حذف القائمة", de: "Menü löschen" },
   "nutrition.manualLog": { en: "My Meal Log", he: "יומן הארוחות שלי", es: "Mi registro de comidas", zh: "我的用餐记录", ar: "سجل وجباتي", de: "Mein Essensprotokoll" },
   "nutrition.dailyWorkout": { en: "Daily Workout", he: "אימון יומי", es: "Entreno diario", zh: "每日训练", ar: "تمرين يومي", de: "Tägliches Training" },
   "nutrition.recovery": { en: "Physio Recovery", he: "שיקום פיזיותרפי", es: "Recuperación fisioterapéutica", zh: "理疗恢复", ar: "العلاج الطبيعي", de: "Physiotherapie" },
