@@ -169,7 +169,9 @@ const AcademyPage = () => {
         <div className="space-y-3">
           {articles.map((article, i) => {
             const isExpanded = expandedId === article.id;
-            const staticSummary = article.summary || "";
+            const translated = translatedStatic[article.id];
+            const displayTitle = (lang !== "he" && translated?.title) ? translated.title : article.title;
+            const displaySummary = (lang !== "he" && translated?.summary) ? translated.summary : (article.summary || "");
 
             return (
               <motion.div
@@ -193,11 +195,11 @@ const AcademyPage = () => {
                     <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                   </div>
                   <h3 className="font-semibold text-foreground leading-tight text-sm mb-2">
-                    {article.title}
+                    {displayTitle}
                   </h3>
-                  {staticSummary && (
+                  {displaySummary && (
                     <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                      {staticSummary}
+                      {displaySummary}
                     </p>
                   )}
                 </button>
