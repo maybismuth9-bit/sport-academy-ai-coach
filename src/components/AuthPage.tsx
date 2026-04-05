@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLang } from "@/contexts/LangContext";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Loader2, Eye, EyeOff, ShieldCheck, KeyRound, CheckCircle } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 interface AuthPageProps {
@@ -13,11 +13,14 @@ interface AuthPageProps {
 
 const PASSWORD_REGEX = /^(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
 
+type AuthMode = "login" | "signup" | "forgot" | "verify" | "reset_verify" | "reset_password";
+
 const AuthPage = ({ onAuth }: AuthPageProps) => {
   const { t } = useLang();
-  const [mode, setMode] = useState<"login" | "signup" | "forgot" | "verify">("login");
+  const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -59,14 +62,64 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
     }
   };
 
+  const handleVerifyResetOtp = async () => {
+    if (otpCode.length !== 6) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpCode,
+        type: "recovery",
+      });
+      if (error) throw error;
+      // OTP verified, now show new password form
+      setMode("reset_password");
+      setOtpCode("");
+    } catch (err: any) {
+      toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      toast({ title: t("auth.error"), description: t("auth.passwordsNoMatch"), variant: "destructive" });
+      return;
+    }
+    if (!PASSWORD_REGEX.test(password)) {
+      toast({ title: t("auth.error"), description: t("auth.passwordRequirements"), variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      toast({ title: t("auth.passwordUpdated"), description: t("auth.passwordUpdatedDesc") });
+      setPassword("");
+      setConfirmPassword("");
+      setMode("login");
+    } catch (err: any) {
+      toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleResendOtp = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email,
-      });
-      if (error) throw error;
+      if (mode === "reset_verify") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.resend({
+          type: "signup",
+          email,
+        });
+        if (error) throw error;
+      }
       toast({ title: t("auth.otpResent"), description: t("auth.otpResentDesc") });
     } catch (err: any) {
       toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
@@ -80,11 +133,11 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
     setLoading(true);
     try {
       if (mode === "forgot") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
-        });
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
         if (error) throw error;
         toast({ title: t("auth.resetSent"), description: t("auth.resetSentDesc") });
+        setMode("reset_verify");
+        setOtpCode("");
         setLoading(false);
         return;
       }
@@ -108,7 +161,6 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
           },
         });
         if (error) throw error;
-        // Move to OTP verification screen
         setMode("verify");
         toast({ title: t("auth.checkEmail"), description: t("auth.otpSentDesc") });
       }
@@ -119,17 +171,93 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
     }
   };
 
-  // OTP Verification Screen
-  if (mode === "verify") {
+  // Reset Password - New Password Form (after OTP verified)
+  if (mode === "reset_password") {
     return (
       <div className="min-h-screen flex items-center justify-center px-6">
         <div className="glass-card rounded-2xl p-8 w-full max-w-sm space-y-6">
           <div className="text-center space-y-3">
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-              <ShieldCheck className="w-8 h-8 text-primary" />
+              <KeyRound className="w-8 h-8 text-primary" />
             </div>
             <h1 className="text-2xl font-display font-bold neon-text text-primary">FUELCORE</h1>
-            <p className="text-sm text-muted-foreground">{t("auth.otpTitle")}</p>
+            <p className="text-sm text-muted-foreground">{t("auth.newPassword")}</p>
+          </div>
+
+          <form onSubmit={handleUpdatePassword} className="space-y-4">
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder={t("auth.newPassword")}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+                className="bg-secondary/50 pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <Input
+              type="password"
+              placeholder={t("auth.confirmPassword")}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className="bg-secondary/50"
+            />
+
+            {password.length > 0 && (
+              <div className="space-y-1">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className={`h-1 flex-1 rounded-full transition-colors ${
+                        i <= getPasswordStrength(password) ? strengthLabel().color : "bg-secondary"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {strengthLabel().text} — {t("auth.passwordRequirements")}
+                </p>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full bg-cta-green hover:bg-cta-green/90 text-black font-bold"
+              disabled={loading}
+            >
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {t("auth.updatePassword")}
+            </Button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // OTP Verification Screens (signup & reset)
+  if (mode === "verify" || mode === "reset_verify") {
+    const isReset = mode === "reset_verify";
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6">
+        <div className="glass-card rounded-2xl p-8 w-full max-w-sm space-y-6">
+          <div className="text-center space-y-3">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              {isReset ? <KeyRound className="w-8 h-8 text-primary" /> : <ShieldCheck className="w-8 h-8 text-primary" />}
+            </div>
+            <h1 className="text-2xl font-display font-bold neon-text text-primary">FUELCORE</h1>
+            <p className="text-sm text-muted-foreground">
+              {isReset ? t("auth.resetOtpTitle") : t("auth.otpTitle")}
+            </p>
             <p className="text-xs text-muted-foreground/70">{email}</p>
           </div>
 
@@ -151,7 +279,7 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
           </div>
 
           <Button
-            onClick={handleVerifyOtp}
+            onClick={isReset ? handleVerifyResetOtp : handleVerifyOtp}
             className="w-full bg-cta-green hover:bg-cta-green/90 text-black font-bold"
             disabled={loading || otpCode.length !== 6}
           >
@@ -170,10 +298,10 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
             </button>
             <div>
               <button
-                onClick={() => { setMode("signup"); setOtpCode(""); }}
+                onClick={() => { setMode(isReset ? "forgot" : "signup"); setOtpCode(""); }}
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
-                ← {t("auth.backToSignup")}
+                ← {isReset ? t("auth.backToLogin") : t("auth.backToSignup")}
               </button>
             </div>
           </div>
