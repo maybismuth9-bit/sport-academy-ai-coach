@@ -23,8 +23,9 @@ serve(async (req) => {
     const userPrompt = `Goal: ${goal}, ${weight}kg, ${height}cm, age ${age}, activity ${activityLevel}/5, allergies: ${allergies || "None"}, ${mealFrequency} meals/day.
 
 Return this exact JSON structure:
-{"days":[{"day":"<day name>","totalCalories":<number>,"meals":[{"mealName":"<meal>","time":"<HH:MM>","items":[{"food":"<name>","amount":"<grams>","calories":<n>,"protein":<n>}]}]}],"weeklyAvgCalories":<number>}
+{"days":[{"day":"<day name>","totalCalories":<number>,"meals":[{"mealName":"<meal name>","items":[{"food":"<name>","amount":"<grams>","calories":<n>,"protein":<n>}]}]}]}
 
+Do NOT include time/hours for meals. Only use meal names like Breakfast, Lunch, Dinner, Snack.
 Generate all 7 days (Sunday-Saturday). Keep food names short.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
