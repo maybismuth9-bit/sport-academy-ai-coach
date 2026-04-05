@@ -8,6 +8,7 @@ import {
   Sparkles, Loader2, ChevronLeft, ChevronRight,
   Apple, Plus, Pencil, Trash2, Utensils, MoreVertical, RefreshCw, ArrowLeftRight, Target
 } from "lucide-react";
+import nutritionHero from "@/assets/nutrition-hero.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
