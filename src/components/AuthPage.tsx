@@ -354,7 +354,7 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={8}
+                minLength={mode === "login" ? 1 : 8}
                 className="bg-secondary/50 pr-10"
               />
               <button
