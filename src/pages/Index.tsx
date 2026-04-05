@@ -67,35 +67,22 @@ const AppContent = () => {
         <div className="absolute top-4 right-4 z-50">
           <LangToggle />
         </div>
-        <AnimatePresence mode="wait">
-          {showAuth ? (
-            <motion.div
-              key="auth"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-            >
-              <div className="pt-4 px-4">
-                <button
-                  onClick={() => setShowAuth(false)}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  ← {t("auth.login") === "Log In" ? "Back" : "חזרה"}
-                </button>
-              </div>
-              <AuthPage onAuth={() => {}} />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="landing"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-            >
-              <LandingPage onGetStarted={() => setShowAuth(true)} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {showAuth ? (
+          <div>
+            <div className="pt-4 px-4">
+              <button
+                type="button"
+                onClick={() => setShowAuth(false)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ← {t("auth.login") === "Log In" ? "Back" : "חזרה"}
+              </button>
+            </div>
+            <AuthPage onAuth={() => {}} />
+          </div>
+        ) : (
+          <LandingPage onGetStarted={() => setShowAuth(true)} />
+        )}
       </div>
     );
   }
