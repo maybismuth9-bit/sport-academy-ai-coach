@@ -149,7 +149,7 @@ const HomeFeed = ({ onStartAssessment, onNavigate }: HomeFeedProps) => {
           <p className="text-[10px] font-display font-semibold text-cta-orange tracking-[0.2em] uppercase mb-1">
             {t("home.dailyMotivation")}
           </p>
-          <p className="text-foreground text-sm italic leading-relaxed">"{t("home.motivationQuote")}"</p>
+          <p className="text-foreground text-sm italic leading-relaxed">"{t(`home.motivationQuote.${new Date().getDay()}`)}"</p>
         </motion.div>
       </div>
 
