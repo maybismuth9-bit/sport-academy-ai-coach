@@ -14,7 +14,7 @@ const translations: Translations = {
   "nav.workout": { en: "Workout", he: "אימון", es: "Entreno", zh: "训练", ar: "التمرين", de: "Training" },
   "nav.nutrition": { en: "Nutrition", he: "תזונה", es: "Nutrición", zh: "营养", ar: "التغذية", de: "Ernährung" },
   "nav.recovery": { en: "Recovery", he: "שיקום", es: "Recuperación", zh: "恢复", ar: "التعافي", de: "Erholung" },
-  "nav.physio": { en: "Physio", he: "פיזיו", es: "Fisio", zh: "理疗", ar: "العلاج", de: "Physio" },
+  "nav.physio": { en: "Physiotherapy", he: "פיזיותרפיה", es: "Fisioterapia", zh: "物理治疗", ar: "العلاج الطبيعي", de: "Physiotherapie" },
   "nav.progress": { en: "Progress", he: "התקדמות", es: "Progreso", zh: "进步", ar: "التقدم", de: "Fortschritt" },
 
   // Home
