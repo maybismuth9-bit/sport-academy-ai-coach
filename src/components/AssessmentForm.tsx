@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronLeft, Loader2, CheckCircle2, Sparkles } from "lucide-react";
+import { ChevronRight, ChevronLeft, Loader2, CheckCircle2, Sparkles, Upload, Camera, FileVideo, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useLang } from "@/contexts/LangContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,11 +15,19 @@ export interface AssessmentData {
   height: string;
   bodyFat: string;
   goal: string;
+  goalDetail: string;
   activityLevel: string;
   allergies: string[];
   mealFrequency: string;
   workoutDuration: string;
   injuries: string;
+  experience: string;
+  sleepHours: string;
+  stressLevel: string;
+  waterIntake: string;
+  supplements: string;
+  medicalConditions: string;
+  uploadedFileUrl: string;
 }
 
 export interface NutritionPlan {
@@ -40,13 +49,18 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
   const [step, setStep] = useState(0);
   const [generating, setGenerating] = useState(false);
   const [planReady, setPlanReady] = useState<{ data: AssessmentData; plan: NutritionPlan } | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<AssessmentData>({
-    age: "", weight: "", height: "", bodyFat: "", goal: "",
+    age: "", weight: "", height: "", bodyFat: "", goal: "", goalDetail: "",
     activityLevel: "", allergies: [], mealFrequency: "3",
-    workoutDuration: "", injuries: "",
+    workoutDuration: "", injuries: "", experience: "",
+    sleepHours: "", stressLevel: "", waterIntake: "",
+    supplements: "", medicalConditions: "", uploadedFileUrl: "",
   });
 
-  const totalSteps = 4;
+  const totalSteps = 6;
   const progress = ((step + 1) / totalSteps) * 100;
 
   const goals = [
@@ -61,6 +75,18 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
     { value: "3", label: t("assess.activity3") },
     { value: "4", label: t("assess.activity4") },
     { value: "5", label: t("assess.activity5") },
+  ];
+
+  const experienceLevels = [
+    { value: "beginner", label: t("assess.expBeginner") },
+    { value: "intermediate", label: t("assess.expIntermediate") },
+    { value: "advanced", label: t("assess.expAdvanced") },
+  ];
+
+  const stressLevels = [
+    { value: "low", label: t("assess.stressLow") },
+    { value: "medium", label: t("assess.stressMedium") },
+    { value: "high", label: t("assess.stressHigh") },
   ];
 
   const allergyOptions = [
@@ -85,14 +111,38 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
     }
   };
 
-  // Validate required fields per step
   const canProceed = () => {
     switch (step) {
       case 0: return !!data.goal;
       case 1: return !!data.age && !!data.weight && !!data.height;
-      case 2: return !!data.activityLevel;
-      case 3: return data.allergies.length > 0;
+      case 2: return !!data.activityLevel && !!data.experience;
+      case 3: return !!data.stressLevel && !!data.sleepHours;
+      case 4: return data.allergies.length > 0;
+      case 5: return true; // photo upload is optional
       default: return true;
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setUploadedFile(file);
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not logged in");
+
+      const ext = file.name.split(".").pop();
+      const path = `assessments/${user.id}/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("progress-photos").upload(path, file);
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage.from("progress-photos").getPublicUrl(path);
+      setData(prev => ({ ...prev, uploadedFileUrl: urlData.publicUrl }));
+      toast.success(t("assess.uploadSuccess"));
+    } catch (e: any) {
+      toast.error(e.message);
+      setUploadedFile(null);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -168,6 +218,15 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
                 </button>
               ))}
             </div>
+            <div className="mt-4 space-y-2">
+              <Label className="text-base font-semibold text-foreground">{t("assess.trainingGoalDetail")}</Label>
+              <Textarea
+                placeholder={t("assess.goalDetailPlaceholder")}
+                value={data.goalDetail}
+                onChange={(e) => setData({ ...data, goalDetail: e.target.value })}
+                className="bg-secondary border-border text-foreground placeholder:text-muted-foreground min-h-[80px] resize-none"
+              />
+            </div>
           </div>
         );
 
@@ -209,6 +268,17 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
                 ))}
               </div>
             </div>
+            <div className="space-y-4">
+              <Label className="text-base font-semibold text-foreground">{t("assess.experience")}</Label>
+              <div className="grid grid-cols-1 gap-3">
+                {experienceLevels.map((level) => (
+                  <button key={level.value} onClick={() => setData({ ...data, experience: level.value })}
+                    className={`p-3 rounded-xl text-left font-semibold transition-all duration-300 border text-sm ${data.experience === level.value ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
+                    {level.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="space-y-2">
               <Label className="text-base font-semibold text-foreground">{t("assess.injuries")}</Label>
               <Input placeholder={t("assess.injuriesPlaceholder")} value={data.injuries}
@@ -228,6 +298,53 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
         );
 
       case 3:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <Label className="text-xl font-semibold text-foreground">{t("assess.stressLevel")}</Label>
+              <div className="grid grid-cols-1 gap-3">
+                {stressLevels.map((level) => (
+                  <button key={level.value} onClick={() => setData({ ...data, stressLevel: level.value })}
+                    className={`p-3 rounded-xl text-left font-semibold transition-all duration-300 border text-sm ${data.stressLevel === level.value ? "border-primary bg-primary/10 text-primary neon-border" : "border-border bg-secondary text-foreground hover:border-primary/30"}`}>
+                    {level.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-base font-semibold text-foreground">{t("assess.sleepHours")}</Label>
+              <div className="relative">
+                <Input type="number" placeholder="e.g. 7" value={data.sleepHours}
+                  onChange={(e) => setData({ ...data, sleepHours: e.target.value })}
+                  className="h-12 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:neon-border pr-16" />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{t("assess.hours")}</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-base font-semibold text-foreground">{t("assess.waterIntake")}</Label>
+              <div className="relative">
+                <Input type="number" placeholder="e.g. 2.5" value={data.waterIntake}
+                  onChange={(e) => setData({ ...data, waterIntake: e.target.value })}
+                  className="h-12 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:neon-border pr-16" />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{t("assess.liters")}</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-base font-semibold text-foreground">{t("assess.medicalConditions")}</Label>
+              <Input placeholder={t("assess.medicalPlaceholder")} value={data.medicalConditions}
+                onChange={(e) => setData({ ...data, medicalConditions: e.target.value })}
+                className="h-12 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:neon-border" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-base font-semibold text-foreground">{t("assess.supplements")}</Label>
+              <Input placeholder={t("assess.supplementsPlaceholder")} value={data.supplements}
+                onChange={(e) => setData({ ...data, supplements: e.target.value })}
+                className="h-12 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:neon-border" />
+            </div>
+          </div>
+        );
+
+      case 4:
         return (
           <div className="space-y-6">
             <div className="space-y-4">
@@ -255,6 +372,58 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
           </div>
         );
 
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <Label className="text-xl font-semibold text-foreground">{t("assess.uploadTitle")}</Label>
+              <p className="text-sm text-muted-foreground">{t("assess.uploadDesc")}</p>
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileUpload(file);
+              }}
+            />
+
+            {!uploadedFile ? (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full border-2 border-dashed border-border rounded-2xl p-10 flex flex-col items-center gap-4 hover:border-primary/40 transition-colors bg-secondary/30"
+              >
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Upload className="w-8 h-8 text-primary" />
+                </div>
+                <div className="flex items-center gap-3 text-muted-foreground">
+                  <Camera className="w-5 h-5" />
+                  <span className="text-sm font-medium">{t("assess.uploadButton")}</span>
+                  <FileVideo className="w-5 h-5" />
+                </div>
+              </button>
+            ) : (
+              <div className="glass-card rounded-2xl p-5 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-xl bg-cta-green/10 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 className="w-7 h-7 text-cta-green" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-foreground text-sm truncate">{uploadedFile.name}</p>
+                  <p className="text-xs text-muted-foreground">{(uploadedFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                </div>
+                <button onClick={() => { setUploadedFile(null); setData(prev => ({ ...prev, uploadedFileUrl: "" })); }}
+                  className="p-2 rounded-lg hover:bg-destructive/10 transition-colors">
+                  <X className="w-4 h-4 text-destructive" />
+                </button>
+              </div>
+            )}
+          </div>
+        );
+
       default:
         return null;
     }
@@ -264,7 +433,9 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
     t("assess.stepGoal"),
     t("assess.stepStats"),
     t("assess.stepActivity"),
+    t("assess.stepExperience"),
     t("assess.stepDiet"),
+    t("assess.stepPhoto"),
   ];
 
   return (
@@ -290,7 +461,7 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
             <ChevronLeft className="w-4 h-4 mr-1" /> {t("assess.back")}
           </Button>
         )}
-        <Button onClick={handleNext} disabled={!canProceed()}
+        <Button onClick={handleNext} disabled={!canProceed() || uploading}
           className="flex-1 h-12 bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:bg-primary/90 disabled:opacity-50">
           {step === totalSteps - 1 ? t("assess.complete") : t("assess.next")} <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
