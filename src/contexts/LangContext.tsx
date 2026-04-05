@@ -99,8 +99,8 @@ const translations: Translations = {
   "assess.height": { en: "What's your height?", he: "מה הגובה שלך?", es: "¿Cuánto mides?", zh: "你的身高是多少？", ar: "كم طولك؟", de: "Wie groß bist du?" },
   "assess.bodyFat": { en: "Body fat percentage?", he: "אחוז שומן גוף?", es: "¿Porcentaje de grasa corporal?", zh: "体脂百分比？", ar: "نسبة الدهون في الجسم؟", de: "Körperfettanteil?" },
   "assess.goal": { en: "What's your training goal?", he: "מה מטרת האימון שלך?", es: "¿Cuál es tu objetivo?", zh: "你的训练目标是什么？", ar: "ما هدف تدريبك؟", de: "Was ist dein Trainingsziel?" },
-  "assess.goalMuscle": { en: "Muscle Mass", he: "מסת שריר", es: "Masa muscular", zh: "增肌", ar: "كتلة عضلية", de: "Muskelmasse" },
-  "assess.goalLoss": { en: "Weight Loss", he: "ירידה במשקל", es: "Pérdida de peso", zh: "减重", ar: "فقدان الوزن", de: "Gewichtsverlust" },
+  "assess.goalMuscle": { en: "Muscle Mass (Bulking)", he: "מסת שריר (בניית שריר)", es: "Masa muscular (volumen)", zh: "增肌", ar: "كتلة عضلية (تضخيم)", de: "Muskelmasse (Aufbau)" },
+  "assess.goalLoss": { en: "Weight Loss (Cutting)", he: "ירידה במשקל (חיתוך)", es: "Pérdida de peso (definición)", zh: "减重(切割)", ar: "فقدان الوزن (تنشيف)", de: "Gewichtsverlust (Cutting)" },
   "assess.goalMaintenance": { en: "Maintenance", he: "שימור", es: "Mantenimiento", zh: "维持", ar: "الحفاظ", de: "Erhaltung" },
   "assess.activityLevel": { en: "How many times per week do you work out?", he: "כמה פעמים בשבוע את/ה מתאמנ/ת?", es: "¿Cuántas veces por semana entrenas?", zh: "你每周锻炼几次？", ar: "كم مرة تتمرن أسبوعياً؟", de: "Wie oft trainierst du pro Woche?" },
   "assess.activity1": { en: "1 time per week", he: "פעם בשבוע", es: "1 vez por semana", zh: "每周1次", ar: "مرة واحدة أسبوعياً", de: "1x pro Woche" },
@@ -108,9 +108,11 @@ const translations: Translations = {
   "assess.activity3": { en: "3 times per week", he: "3 פעמים בשבוע", es: "3 veces por semana", zh: "每周3次", ar: "3 مرات أسبوعياً", de: "3x pro Woche" },
   "assess.activity4": { en: "4-5 times per week", he: "4-5 פעמים בשבוע", es: "4-5 veces por semana", zh: "每周4-5次", ar: "4-5 مرات أسبوعياً", de: "4-5x pro Woche" },
   "assess.activity5": { en: "6+ times per week", he: "6+ פעמים בשבוע", es: "6+ veces por semana", zh: "每周6+次", ar: "6+ مرات أسبوعياً", de: "6+ pro Woche" },
-  "assess.allergies": { en: "Any food allergies?", he: "יש אלרגיות למזון?", es: "¿Alergias alimentarias?", zh: "有食物过敏吗？", ar: "هل لديك حساسية غذائية؟", de: "Nahrungsmittelallergien?" },
+  "assess.allergies": { en: "Any food allergies or dietary restrictions?", he: "יש אלרגיות למזון או הגבלות תזונתיות?", es: "¿Alergias o restricciones alimentarias?", zh: "有食物过敏或饮食限制吗？", ar: "هل لديك حساسية غذائية أو قيود؟", de: "Nahrungsmittelallergien oder Einschränkungen?" },
   "assess.allergyGluten": { en: "Gluten", he: "גלוטן", es: "Gluten", zh: "麸质", ar: "الغلوتين", de: "Gluten" },
   "assess.allergyLactose": { en: "Lactose", he: "לקטוז", es: "Lactosa", zh: "乳糖", ar: "اللاكتوز", de: "Laktose" },
+  "assess.allergyVegan": { en: "Vegan", he: "טבעוני", es: "Vegano", zh: "纯素", ar: "نباتي", de: "Vegan" },
+  "assess.allergyVegetarian": { en: "Vegetarian", he: "צמחוני", es: "Vegetariano", zh: "素食", ar: "نباتي", de: "Vegetarisch" },
   "assess.allergyNone": { en: "None", he: "אין", es: "Ninguna", zh: "无", ar: "لا يوجد", de: "Keine" },
   "assess.mealFrequency": { en: "Meals per day?", he: "ארוחות ביום?", es: "¿Comidas al día?", zh: "每日餐数？", ar: "عدد الوجبات يومياً؟", de: "Mahlzeiten pro Tag?" },
   "assess.workoutDuration": { en: "Workout duration (minutes)?", he: "משך אימון (דקות)?", es: "¿Duración del entreno (min)?", zh: "训练时长（分钟）？", ar: "مدة التمرين (دقائق)؟", de: "Trainingsdauer (Minuten)?" },
@@ -220,6 +222,9 @@ const translations: Translations = {
   "nutrition.adjustMeals": { en: "Adjust meal count", he: "שנה כמות ארוחות", es: "Ajustar comidas", zh: "调整餐数", ar: "تعديل عدد الوجبات", de: "Mahlzeitenanzahl" },
   "nutrition.dailyWorkout": { en: "Daily Workout", he: "אימון יומי", es: "Entreno diario", zh: "每日训练", ar: "تمرين يومي", de: "Tägliches Training" },
   "nutrition.recovery": { en: "Physio Recovery", he: "שיקום פיזיותרפי", es: "Recuperación fisioterapéutica", zh: "理疗恢复", ar: "العلاج الطبيعي", de: "Physiotherapie" },
+  "nutrition.dailyProtein": { en: "Daily Protein", he: "חלבון יומי", es: "Proteína diaria", zh: "每日蛋白质", ar: "البروتين اليومي", de: "Tägliches Protein" },
+  "nutrition.calorieGoal": { en: "Calorie Goal", he: "יעד קלוריות", es: "Objetivo calórico", zh: "热量目标", ar: "هدف السعرات", de: "Kalorienziel" },
+  "nutrition.setGoal": { en: "Set Goal", he: "קבע יעד", es: "Establecer", zh: "设定目标", ar: "تحديد الهدف", de: "Ziel setzen" },
 
   // Physio
   "physio.title": { en: "PHYSIOTHERAPY", he: "פיזיותרפיה", es: "FISIOTERAPIA", zh: "理疗", ar: "العلاج الطبيعي", de: "PHYSIOTHERAPIE" },
@@ -252,8 +257,8 @@ const translations: Translations = {
 
   // Landing
   "landing.tagline": { en: "AI-Powered Personal Training & Nutrition", he: "אימון אישי ותזונה מבוססי AI", es: "Entrenamiento personal y nutrición con IA", zh: "AI驱动的个人训练与营养", ar: "تدريب شخصي وتغذية بالذكاء الاصطناعي", de: "KI-gestütztes Personal Training & Ernährung" },
-  "landing.cta": { en: "Get Started Free", he: "להתחיל בחינם", es: "Empieza gratis", zh: "免费开始", ar: "ابدأ مجاناً", de: "Kostenlos starten" },
-  "landing.limitedPilot": { en: "🔥 Limited time — free pilot program!", he: "🔥 לזמן מוגבל — תוכנית פיילוט בחינם!", es: "🔥 Tiempo limitado — ¡piloto gratis!", zh: "🔥 限时免费试用计划！", ar: "🔥 لفترة محدودة — برنامج تجريبي مجاني!", de: "🔥 Begrenzte Zeit — kostenloses Pilotprogramm!" },
+  "landing.cta": { en: "Member Access", he: "כניסת חברים", es: "Acceso de Miembros", zh: "会员入口", ar: "دخول الأعضاء", de: "Mitgliederzugang" },
+  "landing.limitedPilot": { en: "🔥 Start your personalized journey today", he: "🔥 התחילו את המסע האישי שלכם היום", es: "🔥 Comienza tu viaje personalizado hoy", zh: "🔥 今天开始你的个性化旅程", ar: "🔥 ابدأ رحلتك الشخصية اليوم", de: "🔥 Starte heute deine personalisierte Reise" },
   "landing.feat1.title": { en: "AI Plans", he: "תוכניות AI", es: "Planes IA", zh: "AI计划", ar: "خطط ذكية", de: "KI-Pläne" },
   "landing.feat1.desc": { en: "Personalized workout & nutrition", he: "אימון ותזונה מותאמים אישית", es: "Entrenamiento y nutrición personalizados", zh: "个性化训练与营养", ar: "تمارين وتغذية مخصصة", de: "Personalisiertes Training & Ernährung" },
   "landing.feat2.title": { en: "Gym Scanner", he: "סורק חדר כושר", es: "Escáner de gym", zh: "健身房扫描", ar: "ماسح الصالة", de: "Gym-Scanner" },
@@ -362,44 +367,49 @@ const translations: Translations = {
   "lang.zh": { en: "中文", he: "中文", es: "中文", zh: "中文", ar: "中文", de: "中文" },
   "lang.ar": { en: "العربية", he: "العربية", es: "العربية", zh: "العربية", ar: "العربية", de: "العربية" },
   "lang.de": { en: "Deutsch", he: "Deutsch", es: "Deutsch", zh: "Deutsch", ar: "Deutsch", de: "Deutsch" },
+
+  // Weekly Photo Reminder
+  "weeklyPhoto.title": { en: "Weekly Progress Photo", he: "תמונת התקדמות שבועית", es: "Foto de progreso semanal", zh: "每周进步照片", ar: "صورة التقدم الأسبوعية", de: "Wöchentliches Fortschrittsfoto" },
+  "weeklyPhoto.desc": { en: "It's time to take your weekly progress photo! Track your transformation.", he: "הגיע הזמן לתמונת ההתקדמות השבועית! עקבו אחר השינוי.", es: "¡Es hora de tu foto semanal! Sigue tu transformación.", zh: "是时候拍摄每周进步照片了！追踪你的变化。", ar: "حان وقت صورة التقدم الأسبوعية! تتبع تحولك.", de: "Zeit für dein wöchentliches Fortschrittsfoto!" },
+  "weeklyPhoto.goToProgress": { en: "Go to Progress", he: "לעמוד התקדמות", es: "Ir a Progreso", zh: "前往进步页面", ar: "اذهب للتقدم", de: "Zum Fortschritt" },
+  "weeklyPhoto.later": { en: "Later", he: "מאוחר יותר", es: "Más tarde", zh: "稍后", ar: "لاحقاً", de: "Später" },
 };
 
 interface LangContextType {
   lang: Lang;
   setLang: (lang: Lang) => void;
-  toggleLang: () => void;
   t: (key: string) => string;
   dir: "ltr" | "rtl";
 }
 
-const LangContext = createContext<LangContextType>({
-  lang: "en",
-  setLang: () => {},
-  toggleLang: () => {},
-  t: (key: string) => key,
-  dir: "ltr",
-});
-
-export const useLang = () => useContext(LangContext);
-
-const LANGS: Lang[] = ["en", "he", "es", "zh", "ar", "de"];
-const RTL_LANGS: Lang[] = ["he", "ar"];
+const LangContext = createContext<LangContextType | undefined>(undefined);
 
 export const LangProvider = ({ children }: { children: ReactNode }) => {
-  const [lang, setLang] = useState<Lang>("en");
+  const [lang, setLang] = useState<Lang>(() => {
+    const saved = localStorage.getItem("fuelcore_lang");
+    return (saved as Lang) || "he";
+  });
 
-  const toggleLang = () => {
-    const idx = LANGS.indexOf(lang);
-    setLang(LANGS[(idx + 1) % LANGS.length]);
+  const t = (key: string): string => {
+    return translations[key]?.[lang] || translations[key]?.["en"] || key;
   };
 
-  const t = (key: string) => translations[key]?.[lang] || translations[key]?.["en"] || key;
+  const dir = lang === "he" || lang === "ar" ? "rtl" : "ltr";
 
-  const dir = RTL_LANGS.includes(lang) ? "rtl" : "ltr";
+  const handleSetLang = (newLang: Lang) => {
+    setLang(newLang);
+    localStorage.setItem("fuelcore_lang", newLang);
+  };
 
   return (
-    <LangContext.Provider value={{ lang, setLang, toggleLang, t, dir }}>
+    <LangContext.Provider value={{ lang, setLang: handleSetLang, t, dir }}>
       {children}
     </LangContext.Provider>
   );
+};
+
+export const useLang = () => {
+  const context = useContext(LangContext);
+  if (!context) throw new Error("useLang must be used within LangProvider");
+  return context;
 };

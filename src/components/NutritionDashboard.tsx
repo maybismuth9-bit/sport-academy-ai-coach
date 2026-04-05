@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { NutritionPlan, AssessmentData } from "@/components/AssessmentForm";
 import {
-  Sparkles, Loader2, ChevronDown, ChevronLeft, ChevronRight,
-  Apple, Plus, Pencil, Trash2, Clock, Utensils, MoreVertical, RefreshCw, ArrowLeftRight
+  Sparkles, Loader2, ChevronLeft, ChevronRight,
+  Apple, Plus, Pencil, Trash2, Utensils, MoreVertical, RefreshCw, ArrowLeftRight, Target
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +53,6 @@ interface NutritionDashboardProps {
 }
 
 const DAYS_HE = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-const DAYS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const mealTimes = ["Breakfast", "Lunch", "Dinner", "Snack"];
 
@@ -65,6 +64,14 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
   const [swappingKey, setSwappingKey] = useState<string | null>(null);
+
+  // Custom calorie goal
+  const [calorieGoal, setCalorieGoal] = useState<number>(() => {
+    const saved = localStorage.getItem("fuelcore_calorie_goal");
+    return saved ? parseInt(saved) : 0;
+  });
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalInput, setGoalInput] = useState("");
 
   // Manual meals state
   const [meals, setMeals] = useState<ManualMeal[]>([]);
@@ -150,7 +157,6 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
     }
   };
 
-  // Swap a single item
   const swapItem = async (dayIdx: number, mealIdx: number, itemIdx: number) => {
     if (!aiMealPlan) return;
     const key = `${dayIdx}-${mealIdx}-${itemIdx}`;
@@ -169,7 +175,6 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
       if (data?.result) {
         const updated = [...aiMealPlan];
         updated[dayIdx].meals[mealIdx].items[itemIdx] = data.result;
-        // Recalculate day total
         updated[dayIdx].totalCalories = updated[dayIdx].meals.reduce(
           (s, m) => s + m.items.reduce((ss, it) => ss + it.calories, 0), 0
         );
@@ -183,7 +188,6 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
     }
   };
 
-  // Swap entire meal
   const swapMeal = async (dayIdx: number, mealIdx: number) => {
     if (!aiMealPlan) return;
     const key = `meal-${dayIdx}-${mealIdx}`;
@@ -215,7 +219,6 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
     }
   };
 
-  // Adjust meal count for the current day
   const adjustMealCount = async (newCount: number) => {
     if (!aiMealPlan) return;
     const key = `adjust-${selectedDayIdx}`;
@@ -248,6 +251,17 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
     } finally {
       setSwappingKey(null);
     }
+  };
+
+  const handleSaveGoal = () => {
+    const val = parseInt(goalInput);
+    if (val > 0) {
+      setCalorieGoal(val);
+      localStorage.setItem("fuelcore_calorie_goal", String(val));
+      toast({ title: "✅", description: t("nutrition.calorieGoal") });
+    }
+    setEditingGoal(false);
+    setGoalInput("");
   };
 
   // Manual meal CRUD
@@ -313,17 +327,16 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
   const dialogOpen = !!editMeal || showAdd;
   const currentAiDay = aiMealPlan?.[selectedDayIdx];
 
-  // Weekly totals
-  const weeklyTotalCalories = aiMealPlan?.reduce((s, d) => s + d.totalCalories, 0) || 0;
-  const weeklyAvgCalories = aiMealPlan ? Math.round(weeklyTotalCalories / aiMealPlan.length) : 0;
+  // Daily protein from AI plan
+  const aiDayProtein = currentAiDay?.meals.reduce(
+    (s, m) => s + m.items.reduce((ss, it) => ss + (it.protein || 0), 0), 0
+  ) || 0;
 
-  // Get day label based on language
   const getDayLabel = (day: MealPlanDay, idx: number) => {
     if (lang === "he") return DAYS_HE[idx] || day.day;
     return day.day;
   };
 
-  // Get meal time color
   const getMealColor = (mealName: string) => {
     const lower = mealName.toLowerCase();
     if (lower.includes("breakfast") || lower.includes("בוקר")) return "bg-cta-orange/15 text-cta-orange border-cta-orange/30";
@@ -343,9 +356,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
       </div>
       <p className="text-sm text-muted-foreground mb-6">{t("nutrition.dailyTargets")}</p>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* AI WEEKLY MEAL PLAN - CALENDAR VIEW        */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* ═══ AI WEEKLY MEAL PLAN ═══ */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -388,7 +399,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
           </div>
         </div>
 
-        {/* Day selector row - weekly calendar tabs */}
+        {/* Day selector */}
         {aiMealPlan && (
           <>
             <div className="flex gap-1 mb-4 overflow-x-auto pb-1">
@@ -413,20 +424,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
               })}
             </div>
 
-            {/* Weekly summary bar */}
-            <div className="glass-card rounded-xl p-3 mb-4 flex items-center justify-between">
-              <div className="text-center flex-1">
-                <p className="text-lg font-bold text-primary font-mono">{weeklyTotalCalories.toLocaleString()}</p>
-                <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("nutrition.weeklyTotal")}</p>
-              </div>
-              <div className="w-px h-8 bg-border" />
-              <div className="text-center flex-1">
-                <p className="text-lg font-bold text-cta-orange font-mono">{weeklyAvgCalories.toLocaleString()}</p>
-                <p className="text-[9px] text-muted-foreground uppercase tracking-wider">AVG/{lang === "he" ? "יום" : "day"}</p>
-              </div>
-            </div>
-
-            {/* Selected day - full schedule */}
+            {/* Selected day */}
             {currentAiDay && (
               <motion.div
                 key={selectedDayIdx}
@@ -442,7 +440,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
                         {getDayLabel(currentAiDay, selectedDayIdx)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {currentAiDay.totalCalories} {t("nutrition.kcal")} {t("nutrition.total")}
+                        {currentAiDay.totalCalories} {t("nutrition.kcal")} • {Math.round(aiDayProtein)}g {t("nutrition.protein")}
                       </p>
                     </div>
                     <div className="flex gap-1">
@@ -486,14 +484,12 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
                   </div>
                 </div>
 
-                {/* Meal schedule - timeline style */}
-                <div className="relative">
-                  {/* Timeline line */}
-                  <div className="absolute top-0 bottom-0 left-[22px] w-px bg-border" />
-
+                {/* Meal cards - NO timestamps, just meal names */}
+                <div className="space-y-3">
                   {currentAiDay.meals.map((meal, mealIdx) => {
                     const colorClass = getMealColor(meal.mealName);
                     const mealCals = meal.items.reduce((s, it) => s + it.calories, 0);
+                    const mealProtein = meal.items.reduce((s, it) => s + (it.protein || 0), 0);
                     const isMealSwapping = swappingKey === `meal-${selectedDayIdx}-${mealIdx}`;
 
                     return (
@@ -502,78 +498,85 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: mealIdx * 0.08 }}
-                        className="relative flex gap-3 mb-3"
+                        className="glass-card rounded-xl p-3 overflow-hidden"
                       >
-                        {/* Timeline dot */}
-                        <div className="flex-shrink-0 w-[45px] flex flex-col items-center pt-3">
-                          <div className={`w-3 h-3 rounded-full border-2 z-10 ${colorClass}`} />
-                          <span className="text-[9px] text-muted-foreground mt-1 font-mono">{meal.time}</span>
-                        </div>
-
-                        {/* Meal card */}
-                        <div className="flex-1 glass-card rounded-xl p-3 overflow-hidden">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className={`text-[10px] font-display font-bold tracking-wider uppercase px-2 py-0.5 rounded-full border ${colorClass}`}>
-                              {meal.mealName}
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`text-[10px] font-display font-bold tracking-wider uppercase px-2 py-0.5 rounded-full border ${colorClass}`}>
+                            {meal.mealName}
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-muted-foreground font-mono">
+                              {mealCals} {t("nutrition.kcal")} • {Math.round(mealProtein)}g
                             </span>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[10px] text-muted-foreground font-mono">
-                                {mealCals} {t("nutrition.kcal")}
-                              </span>
-                              {/* Swap entire meal button */}
-                              <button
-                                onClick={() => swapMeal(selectedDayIdx, mealIdx)}
-                                disabled={!!swappingKey}
-                                className="p-1 rounded-md hover:bg-secondary transition-colors disabled:opacity-30"
-                                title={t("nutrition.swapMeal")}
-                              >
-                                {isMealSwapping
-                                  ? <Loader2 className="w-3 h-3 animate-spin text-cta-orange" />
-                                  : <RefreshCw className="w-3 h-3 text-cta-orange" />}
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => swapMeal(selectedDayIdx, mealIdx)}
+                              disabled={!!swappingKey}
+                              className="p-1 rounded-md hover:bg-secondary transition-colors disabled:opacity-30"
+                              title={t("nutrition.swapMeal")}
+                            >
+                              {isMealSwapping
+                                ? <Loader2 className="w-3 h-3 animate-spin text-cta-orange" />
+                                : <RefreshCw className="w-3 h-3 text-cta-orange" />}
+                            </button>
                           </div>
-                          <div className="space-y-1">
-                            {meal.items.map((item, itemIdx) => {
-                              const isItemSwapping = swappingKey === `${selectedDayIdx}-${mealIdx}-${itemIdx}`;
-                              return (
-                                <div key={itemIdx} className="flex items-center justify-between text-xs group">
-                                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                                    <Utensils className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
-                                    <span className="text-foreground truncate">{item.food}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                                    <span className="text-[10px] text-muted-foreground">{item.amount}</span>
-                                    <span className="text-[10px] text-primary font-mono">{item.calories}cal</span>
-                                    {item.protein && (
-                                      <span className="text-[10px] text-cta-green font-mono">{item.protein}g</span>
-                                    )}
-                                    {/* Swap single item button */}
-                                    <button
-                                      onClick={() => swapItem(selectedDayIdx, mealIdx, itemIdx)}
-                                      disabled={!!swappingKey}
-                                      className="p-0.5 rounded hover:bg-secondary transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-30"
-                                      title={t("nutrition.swapItem")}
-                                    >
-                                      {isItemSwapping
-                                        ? <Loader2 className="w-2.5 h-2.5 animate-spin text-primary" />
-                                        : <ArrowLeftRight className="w-2.5 h-2.5 text-primary" />}
-                                    </button>
-                                  </div>
+                        </div>
+                        <div className="space-y-1">
+                          {meal.items.map((item, itemIdx) => {
+                            const isItemSwapping = swappingKey === `${selectedDayIdx}-${mealIdx}-${itemIdx}`;
+                            return (
+                              <div key={itemIdx} className="flex items-center justify-between text-xs group">
+                                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                  <Utensils className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
+                                  <span className="text-foreground truncate">{item.food}</span>
                                 </div>
-                              );
-                            })}
-                          </div>
+                                <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+                                  <span className="text-[10px] text-muted-foreground">{item.amount}</span>
+                                  <span className="text-[10px] text-primary font-mono">{item.calories}cal</span>
+                                  {item.protein && (
+                                    <span className="text-[10px] text-cta-green font-mono">{item.protein}g</span>
+                                  )}
+                                  <button
+                                    onClick={() => swapItem(selectedDayIdx, mealIdx, itemIdx)}
+                                    disabled={!!swappingKey}
+                                    className="p-0.5 rounded hover:bg-secondary transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-30"
+                                    title={t("nutrition.swapItem")}
+                                  >
+                                    {isItemSwapping
+                                      ? <Loader2 className="w-2.5 h-2.5 animate-spin text-primary" />
+                                      : <ArrowLeftRight className="w-2.5 h-2.5 text-primary" />}
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </motion.div>
                     );
                   })}
                 </div>
 
-                {/* Daily total footer */}
-                <div className="glass-card rounded-xl p-3 flex items-center justify-center gap-4 border border-primary/20">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{t("nutrition.dailyTotal")}:</span>
-                  <span className="text-sm font-bold text-primary font-mono">{currentAiDay.totalCalories} {t("nutrition.kcal")}</span>
+                {/* Daily total footer with protein */}
+                <div className="glass-card rounded-xl p-3 flex items-center justify-center gap-6 border border-primary/20">
+                  <div className="text-center">
+                    <span className="text-sm font-bold text-primary font-mono">{currentAiDay.totalCalories}</span>
+                    <span className="text-[10px] text-muted-foreground ml-1">{t("nutrition.kcal")}</span>
+                  </div>
+                  <div className="w-px h-6 bg-border" />
+                  <div className="text-center">
+                    <span className="text-sm font-bold text-cta-green font-mono">{Math.round(aiDayProtein)}g</span>
+                    <span className="text-[10px] text-muted-foreground ml-1">{t("nutrition.protein")}</span>
+                  </div>
+                  {calorieGoal > 0 && (
+                    <>
+                      <div className="w-px h-6 bg-border" />
+                      <div className="text-center">
+                        <span className={`text-sm font-bold font-mono ${currentAiDay.totalCalories > calorieGoal ? "text-destructive" : "text-cta-green"}`}>
+                          {calorieGoal}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground ml-1">{t("nutrition.calorieGoal")}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -604,9 +607,40 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
         )}
       </div>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* MACROS OVERVIEW (if assessment done)       */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* ═══ CALORIE GOAL SETTER ═══ */}
+      <div className="glass-card rounded-xl p-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Target className="w-4 h-4 text-cta-orange" />
+            <span className="text-xs font-display font-semibold tracking-wider uppercase text-muted-foreground">
+              {t("nutrition.calorieGoal")}
+            </span>
+          </div>
+          {!editingGoal ? (
+            <button
+              onClick={() => { setEditingGoal(true); setGoalInput(calorieGoal > 0 ? String(calorieGoal) : ""); }}
+              className="text-xs text-primary hover:underline"
+            >
+              {calorieGoal > 0 ? `${calorieGoal} kcal ✏️` : t("nutrition.setGoal")}
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                value={goalInput}
+                onChange={(e) => setGoalInput(e.target.value)}
+                placeholder="e.g. 2200"
+                className="w-24 h-7 text-xs bg-secondary border-border"
+              />
+              <Button size="sm" onClick={handleSaveGoal} className="h-7 text-xs bg-primary">
+                ✓
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ═══ MACROS OVERVIEW (if assessment done) ═══ */}
       {plan && (
         <div className="glass-card rounded-2xl p-5 space-y-4 mb-8">
           <h2 className="text-xs font-display font-semibold tracking-[0.2em] uppercase text-muted-foreground">
@@ -628,9 +662,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════ */}
-      {/* MANUAL MEAL TRACKING                       */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* ═══ MANUAL MEAL TRACKING ═══ */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -641,15 +673,15 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
           </div>
         </div>
 
-        {/* Summary */}
+        {/* Summary with protein */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="glass-card rounded-xl p-3 text-center">
             <p className="text-xl font-bold text-foreground">{totalCals}</p>
             <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("nutritionPlan.totalCals")}</p>
           </div>
           <div className="glass-card rounded-xl p-3 text-center">
-            <p className="text-xl font-bold text-foreground">{totalProtein}g</p>
-            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("nutritionPlan.totalProtein")}</p>
+            <p className="text-xl font-bold text-cta-green">{totalProtein}g</p>
+            <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{t("nutrition.dailyProtein")}</p>
           </div>
         </div>
 
