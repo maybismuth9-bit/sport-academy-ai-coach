@@ -65,6 +65,7 @@ const HomeFeed = ({ onStartAssessment, onNavigate }: HomeFeedProps) => {
   }, []);
 
   const quickActions = [
+    { id: "assessment", icon: Trophy, labelKey: "home.qa.assessment", color: "from-yellow-500/20 to-yellow-500/5", iconColor: "text-yellow-400", glow: "shadow-[0_0_20px_hsl(45_90%_50%/0.15)]" },
     { id: "workout", icon: Dumbbell, labelKey: "home.qa.workout", color: "from-primary/20 to-primary/5", iconColor: "text-primary", glow: "shadow-[0_0_20px_hsl(180_80%_50%/0.15)]" },
     { id: "nutrition", icon: Apple, labelKey: "home.qa.nutrition", color: "from-cta-green/20 to-cta-green/5", iconColor: "text-cta-green", glow: "shadow-[0_0_20px_hsl(145_70%_40%/0.15)]" },
     { id: "knowledgeHub", icon: BookOpen, labelKey: "home.qa.academy", color: "from-cta-orange/20 to-cta-orange/5", iconColor: "text-cta-orange", glow: "shadow-[0_0_20px_hsl(25_95%_53%/0.15)]" },

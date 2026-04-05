@@ -37,6 +37,7 @@ const translations: Translations = {
   "home.motivationQuote.6": { en: "Every rep counts. Every meal matters. Every day is a chance to be better.", he: "כל חזרה נחשבת. כל ארוחה חשובה. כל יום הוא הזדמנות להשתפר.", es: "Cada repetición cuenta. Cada comida importa. Cada día es una oportunidad.", zh: "每一次重复都很重要。每一餐都至关重要。每一天都是变得更好的机会。", ar: "كل تكرار مهم. كل وجبة تحسب. كل يوم فرصة لتكون أفضل.", de: "Jede Wiederholung zählt. Jede Mahlzeit ist wichtig. Jeder Tag ist eine Chance." },
   "home.tipsTitle": { en: "Top Fitness Tips", he: "טיפים מובילים", es: "Mejores consejos", zh: "健身要点", ar: "أهم نصائح اللياقة", de: "Top Fitness-Tipps" },
   "home.quickActions": { en: "Quick Actions", he: "גישה מהירה", es: "Acceso rápido", zh: "快捷操作", ar: "وصول سريع", de: "Schnellzugriff" },
+  "home.qa.assessment": { en: "Assessment", he: "שאלון הערכה", es: "Evaluación", zh: "评估", ar: "تقييم", de: "Bewertung" },
   "home.qa.workout": { en: "Workout", he: "אימון", es: "Entreno", zh: "训练", ar: "التمرين", de: "Training" },
   "home.qa.nutrition": { en: "Nutrition", he: "תזונה", es: "Nutrición", zh: "营养", ar: "التغذية", de: "Ernährung" },
   "home.qa.academy": { en: "Academy", he: "אקדמיה", es: "Academia", zh: "学院", ar: "الأكاديمية", de: "Akademie" },
