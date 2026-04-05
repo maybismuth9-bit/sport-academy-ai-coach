@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useLang } from "@/contexts/LangContext";
 import { Zap, Shield, Brain, Dumbbell, Apple, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import gymHeroBg from "@/assets/gym-hero-bg.jpg";
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -19,57 +20,69 @@ const LandingPage = ({ onGetStarted }: LandingPageProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Hero */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pt-16 pb-8 text-center relative overflow-hidden">
-        {/* Animated background orbs */}
-        <div className="absolute top-1/4 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-[100px] animate-pulse" />
-        <div className="absolute bottom-1/4 -right-20 w-48 h-48 rounded-full bg-accent/10 blur-[80px] animate-pulse" />
+      {/* Hero with background image */}
+      <div className="relative flex-1 flex flex-col items-center justify-center px-6 pt-16 pb-8 text-center overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={gymHeroBg}
+            alt="Gym background"
+            width={1080}
+            height={1920}
+            className="w-full h-full object-cover"
+          />
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6 }}
-          className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 backdrop-blur-xl border border-primary/30 flex items-center justify-center mb-6"
-        >
-          <Shield className="w-10 h-10 text-primary drop-shadow-[0_0_12px_hsl(180_80%_50%/0.6)]" />
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-4xl md:text-5xl font-display font-bold tracking-tight leading-tight"
-        >
-          <span className="neon-text text-primary">FUELCORE</span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.5 }}
-          className="text-lg md:text-xl text-muted-foreground mt-3 max-w-md leading-relaxed"
-        >
-          {t("landing.tagline")}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mt-8 w-full max-w-xs"
-        >
-          <Button
-            onClick={onGetStarted}
-            size="lg"
-            className="w-full h-14 text-lg font-display font-bold tracking-wide bg-cta-green hover:bg-cta-green/90 text-white rounded-xl shadow-[0_0_40px_hsl(145_70%_40%/0.5)] transition-all hover:shadow-[0_0_60px_hsl(145_70%_40%/0.6)] hover:scale-[1.02]"
+        {/* Content */}
+        <div className="relative z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/30 to-accent/30 backdrop-blur-xl border border-primary/40 flex items-center justify-center mb-6 mx-auto shadow-[0_0_30px_hsl(180_80%_50%/0.3)]"
           >
-            <Zap className="w-5 h-5 mr-2" />
-            {t("landing.cta")}
-          </Button>
-          <p className="mt-3 text-xs font-semibold text-cta-orange animate-pulse">
-            {t("landing.limitedPilot")}
-          </p>
-        </motion.div>
+            <Shield className="w-10 h-10 text-primary drop-shadow-[0_0_12px_hsl(180_80%_50%/0.6)]" />
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="text-4xl md:text-5xl font-display font-bold tracking-tight leading-tight"
+          >
+            <span className="neon-text text-primary">FUELCORE</span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.5 }}
+            className="text-lg md:text-xl text-foreground/90 mt-3 max-w-md leading-relaxed font-medium drop-shadow-lg"
+          >
+            {t("landing.tagline")}
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8 w-full max-w-xs mx-auto"
+          >
+            <Button
+              onClick={onGetStarted}
+              size="lg"
+              className="w-full h-14 text-lg font-display font-bold tracking-wide bg-cta-green hover:bg-cta-green/90 text-white rounded-xl shadow-[0_0_40px_hsl(145_70%_40%/0.5)] transition-all hover:shadow-[0_0_60px_hsl(145_70%_40%/0.6)] hover:scale-[1.02]"
+            >
+              <Zap className="w-5 h-5 mr-2" />
+              {t("landing.cta")}
+            </Button>
+            <p className="mt-3 text-xs font-semibold text-cta-orange animate-pulse drop-shadow-md">
+              {t("landing.limitedPilot")}
+            </p>
+          </motion.div>
+        </div>
       </div>
 
       {/* Features grid */}
