@@ -775,6 +775,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };

@@ -321,6 +321,7 @@ const WorkoutGenerator = () => {
             {t("workout.skipToAi")}
           </Button>
         </div>
+        </div>
       </div>
     );
   }
