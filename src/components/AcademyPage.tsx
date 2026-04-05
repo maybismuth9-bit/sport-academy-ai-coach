@@ -30,10 +30,58 @@ const AcademyPage = () => {
   const [loadingSummary, setLoadingSummary] = useState<string | null>(null);
   const [articles, setArticles] = useState<DBArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [translatedStatic, setTranslatedStatic] = useState<Record<string, { title: string; summary: string }>>({});
 
   useEffect(() => {
     fetchArticles();
   }, []);
+
+  // Translate static titles & summaries for non-Hebrew users
+  useEffect(() => {
+    if (lang === "he" || articles.length === 0) return;
+    
+    articles.forEach(async (article) => {
+      const cacheKey = `fuelcore_static_${article.id}_${lang}`;
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setTranslatedStatic(prev => ({ ...prev, [article.id]: parsed }));
+        return;
+      }
+
+      try {
+        const langMap: Record<string, string> = {
+          en: "English", es: "Spanish", zh: "Chinese", ar: "Arabic", de: "German",
+        };
+        const targetLang = langMap[lang] || "English";
+        
+        const { data, error } = await supabase.functions.invoke("generate-article-summary", {
+          body: {
+            title: `Translate the following Hebrew title and summary to ${targetLang}. Return ONLY a JSON object with "title" and "summary" keys. Title: "${article.title}" Summary: "${article.summary || ""}"`,
+            sourceUrl: "",
+            language: lang,
+          },
+        });
+
+        // Try to parse as JSON, fallback to just using the text
+        if (!error && data?.summary) {
+          try {
+            const parsed = JSON.parse(data.summary);
+            const result = { title: parsed.title || article.title, summary: parsed.summary || article.summary || "" };
+            setTranslatedStatic(prev => ({ ...prev, [article.id]: result }));
+            sessionStorage.setItem(cacheKey, JSON.stringify(result));
+          } catch {
+            // If not JSON, just use as translated summary
+            const result = { title: article.title, summary: data.summary };
+            setTranslatedStatic(prev => ({ ...prev, [article.id]: result }));
+            sessionStorage.setItem(cacheKey, JSON.stringify(result));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to translate article:", err);
+      }
+    });
+  }, [lang, articles]);
 
   const fetchArticles = async () => {
     setLoading(true);
