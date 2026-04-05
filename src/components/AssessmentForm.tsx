@@ -66,6 +66,8 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
   const allergyOptions = [
     t("assess.allergyGluten"),
     t("assess.allergyLactose"),
+    t("assess.allergyVegan"),
+    t("assess.allergyVegetarian"),
     t("assess.allergyNone"),
   ];
 
@@ -80,6 +82,17 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
       } else {
         setData({ ...data, allergies: [...filtered, allergy] });
       }
+    }
+  };
+
+  // Validate required fields per step
+  const canProceed = () => {
+    switch (step) {
+      case 0: return !!data.goal;
+      case 1: return !!data.age && !!data.weight && !!data.height;
+      case 2: return !!data.activityLevel;
+      case 3: return data.allergies.length > 0;
+      default: return true;
     }
   };
 
@@ -143,7 +156,6 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
 
   const renderStep = () => {
     switch (step) {
-      // Step 1: Goal
       case 0:
         return (
           <div className="space-y-4">
@@ -159,7 +171,6 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
           </div>
         );
 
-      // Step 2: Physical stats
       case 1:
         return (
           <div className="space-y-5">
@@ -184,7 +195,6 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
           </div>
         );
 
-      // Step 3: Activity level & injuries
       case 2:
         return (
           <div className="space-y-6">
@@ -217,7 +227,6 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
           </div>
         );
 
-      // Step 4: Dietary preferences
       case 3:
         return (
           <div className="space-y-6">
@@ -281,8 +290,8 @@ const AssessmentForm = ({ onComplete }: AssessmentFormProps) => {
             <ChevronLeft className="w-4 h-4 mr-1" /> {t("assess.back")}
           </Button>
         )}
-        <Button onClick={handleNext}
-          className="flex-1 h-12 bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:bg-primary/90">
+        <Button onClick={handleNext} disabled={!canProceed()}
+          className="flex-1 h-12 bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:bg-primary/90 disabled:opacity-50">
           {step === totalSteps - 1 ? t("assess.complete") : t("assess.next")} <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </div>

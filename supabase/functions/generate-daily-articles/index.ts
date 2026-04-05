@@ -56,17 +56,19 @@ Deno.serve(async (req) => {
     const selectedTopics = shuffled.slice(0, numArticles);
 
     const prompt = `Generate ${numArticles} fitness/nutrition research article summaries. For each article provide:
-- title: A compelling, specific article title (in English)
+- title: A compelling, specific article title (in Hebrew)
 - category: One of: ${categories.join(", ")}
-- summary: A 3-sentence evidence-based summary with specific numbers/data
+- summary: A 3-sentence evidence-based summary with specific numbers/data (in Hebrew)
 - link: A real PubMed or research journal URL related to the topic (use pubmed.ncbi.nlm.nih.gov format)
+
+IMPORTANT: The title and the first 3 sentences of the summary MUST be in Hebrew.
 
 Topics to cover: ${selectedTopics.join(", ")}
 
 Return ONLY a valid JSON array, no markdown, no explanation:
 [{"title":"...","category":"...","summary":"...","link":"https://..."}]`;
 
-    const res = await fetch("https://api.lovable.dev/v1/chat/completions", {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -75,7 +77,7 @@ Return ONLY a valid JSON array, no markdown, no explanation:
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are a sports science researcher. Return only valid JSON arrays." },
+          { role: "system", content: "You are a sports science researcher. Return only valid JSON arrays. All article titles and summaries must be written in Hebrew." },
           { role: "user", content: prompt },
         ],
       }),

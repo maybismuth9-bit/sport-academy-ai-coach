@@ -31,15 +31,41 @@ serve(async (req) => {
       ? focusAreas.join(", ")
       : "Full Body";
 
-    const prompt = `Generate a ${daysPerWeek}-day weekly workout plan focused on: ${focusText}.
+    // Determine split structure based on days
+    let splitInstructions = "";
+    if (daysPerWeek <= 2) {
+      splitInstructions = `This is a Full Body split. Each day should include 1 exercise per major muscle group (Legs, Back, Chest, Shoulders, Arms). Select exercises covering all groups each session.`;
+    } else if (daysPerWeek === 3) {
+      splitInstructions = `This is an A/B/C split:
+- Day A: Chest, Shoulders, Triceps (Push day)
+- Day B: Back, Biceps, Rear Delts (Pull day)  
+- Day C: Legs, Core (Lower body day)
+Select 2 exercises from the primary muscle group and 1-2 from the secondary groups for each day.`;
+    } else if (daysPerWeek === 4) {
+      splitInstructions = `This is an Upper/Lower split (A/B/A/B):
+- Day A (Upper Push): Chest, Shoulders, Triceps
+- Day B (Lower): Quads, Hamstrings, Glutes, Calves
+- Day C (Upper Pull): Back, Biceps, Rear Delts
+- Day D (Lower + Core): Legs, Core, Calves
+Select 2-3 exercises per primary muscle group.`;
+    } else {
+      splitInstructions = `This is a ${daysPerWeek}-day bro split. Each day focuses on 1-2 muscle groups with 4-5 exercises. Distribute muscle groups evenly across days.`;
+    }
+
+    const prompt = `Generate a ${daysPerWeek}-day weekly workout plan.
+
+${splitInstructions}
+
+User focus preferences: ${focusText}
 
 ${equipmentContext}
 ${weightContext}
 
-For each training day, provide:
-- A day label (Day A, Day B, etc.)
-- A focus description
-- 4-5 exercises, each with: name, muscle group, sets (number), reps (string like "8-10"), rest time, suggested starting weight in kg, a detailed description (2-3 sentences explaining proper form and technique), and 2-3 practical tips
+CRITICAL RULES:
+1. Exercise ordering: ALWAYS list compound movements FIRST (e.g., Squats, Bench Press, Deadlifts, Overhead Press, Rows, Pull-ups), followed by isolation exercises (e.g., Curls, Lateral Raises, Leg Extensions, Cable Flyes).
+2. Each exercise description MUST be exactly 3 lines maximum - concise form cues only.
+3. Include 2-3 practical tips per exercise.
+4. For each training day, provide 4-5 exercises.
 
 Return ONLY valid JSON in this exact format:
 {
@@ -55,8 +81,8 @@ Return ONLY valid JSON in this exact format:
           "reps": "8-10",
           "rest": "90s",
           "weight": "60kg",
-          "description": "Lie flat on the bench with feet firmly on the floor. Grip the bar slightly wider than shoulder-width, lower it to mid-chest, then press up explosively while keeping your shoulder blades retracted.",
-          "tips": ["Keep your wrists straight and aligned with your forearms", "Breathe in on the way down, exhale on the press", "Don't bounce the bar off your chest"]
+          "description": "Lie flat on the bench with feet firmly on the floor. Grip the bar slightly wider than shoulder-width. Lower it to mid-chest, then press up explosively.",
+          "tips": ["Keep your wrists straight", "Breathe in on the way down", "Don't bounce the bar"]
         }
       ]
     }
@@ -74,7 +100,7 @@ Important: Exercise names, descriptions, tips, and focus descriptions should all
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "You are a professional strength & conditioning coach. Generate precise, science-based workout plans. Return ONLY valid JSON, no markdown or extra text." },
+          { role: "system", content: "You are a professional strength & conditioning coach. Generate precise, science-based workout plans. ALWAYS order exercises with compound movements first, followed by isolation exercises. Descriptions must be exactly 3 lines max. Return ONLY valid JSON, no markdown or extra text." },
           { role: "user", content: prompt },
         ],
       }),
