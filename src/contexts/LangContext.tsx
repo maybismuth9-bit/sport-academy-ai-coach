@@ -14,7 +14,7 @@ const translations: Translations = {
   "nav.workout": { en: "Workout", he: "אימון", es: "Entreno", zh: "训练", ar: "التمرين", de: "Training" },
   "nav.nutrition": { en: "Nutrition", he: "תזונה", es: "Nutrición", zh: "营养", ar: "التغذية", de: "Ernährung" },
   "nav.recovery": { en: "Recovery", he: "שיקום", es: "Recuperación", zh: "恢复", ar: "التعافي", de: "Erholung" },
-  "nav.physio": { en: "Physio", he: "פיזיו", es: "Fisio", zh: "理疗", ar: "العلاج", de: "Physio" },
+  "nav.physio": { en: "Physiotherapy", he: "פיזיותרפיה", es: "Fisioterapia", zh: "物理治疗", ar: "العلاج الطبيعي", de: "Physiotherapie" },
   "nav.progress": { en: "Progress", he: "התקדמות", es: "Progreso", zh: "进步", ar: "التقدم", de: "Fortschritt" },
 
   // Home
@@ -34,7 +34,7 @@ const translations: Translations = {
   "home.qa.workout": { en: "Workout", he: "אימון", es: "Entreno", zh: "训练", ar: "التمرين", de: "Training" },
   "home.qa.nutrition": { en: "Nutrition", he: "תזונה", es: "Nutrición", zh: "营养", ar: "التغذية", de: "Ernährung" },
   "home.qa.academy": { en: "Academy", he: "אקדמיה", es: "Academia", zh: "学院", ar: "الأكاديمية", de: "Akademie" },
-  "home.qa.physio": { en: "Physio", he: "פיזיו", es: "Fisio", zh: "理疗", ar: "العلاج", de: "Physio" },
+  "home.qa.physio": { en: "Physiotherapy", he: "פיזיותרפיה", es: "Fisioterapia", zh: "物理治疗", ar: "العلاج الطبيعي", de: "Physiotherapie" },
   "home.stat.workouts": { en: "Workouts", he: "אימונים", es: "Entrenos", zh: "训练次数", ar: "التمارين", de: "Trainings" },
   "home.stat.streak": { en: "Day Streak", he: "ימים רצופים", es: "Racha", zh: "连续天数", ar: "أيام متتالية", de: "Tage-Serie" },
   "home.stat.mealsToday": { en: "Meals Today", he: "ארוחות היום", es: "Comidas hoy", zh: "今日餐数", ar: "وجبات اليوم", de: "Mahlzeiten heute" },
