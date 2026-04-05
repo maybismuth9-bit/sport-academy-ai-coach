@@ -21,7 +21,7 @@ import { LangProvider, useLang } from "@/contexts/LangContext";
 import { NutritionPlan, AssessmentData } from "@/components/AssessmentForm";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+
 
 const AppContent = () => {
   const [page, setPage] = useState("home");
