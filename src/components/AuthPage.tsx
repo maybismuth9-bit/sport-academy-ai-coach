@@ -152,7 +152,7 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
           setLoading(false);
           return;
         }
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -161,8 +161,13 @@ const AuthPage = ({ onAuth }: AuthPageProps) => {
           },
         });
         if (error) throw error;
-        setMode("verify");
-        toast({ title: t("auth.checkEmail"), description: t("auth.otpSentDesc") });
+        // If auto-confirm is enabled, session is returned immediately
+        if (data.session) {
+          onAuth();
+        } else {
+          setMode("verify");
+          toast({ title: t("auth.checkEmail"), description: t("auth.otpSentDesc") });
+        }
       }
     } catch (err: any) {
       toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
