@@ -4,6 +4,7 @@ import {
   Upload, Camera, Dumbbell, Zap, Edit3, Save, BarChart3, TrendingUp,
   Trash2, RefreshCw, ChevronUp, ChevronDown, Loader2, CheckCircle2, ArrowRight, Info, MoreVertical
 } from "lucide-react";
+import workoutHero from "@/assets/workout-hero.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -250,13 +251,19 @@ const WorkoutGenerator = () => {
   // ─── QUESTIONNAIRE STEP ───
   if (step === "questionnaire") {
     return (
-      <div className="px-5 pt-8 pb-28">
-        <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary mb-1">
-          {t("workout.title")}
-        </h1>
-        <p className="text-sm text-muted-foreground mb-6">{t("workout.setupDesc")}</p>
-
-        {/* Days per week */}
+      <div className="pb-28">
+        {/* Hero image */}
+        <div className="relative h-40 overflow-hidden">
+          <img src={workoutHero} alt="Workout" className="w-full h-full object-cover" loading="lazy" width={1080} height={640} />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+          <div className="absolute bottom-4 left-5 right-5">
+            <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary">
+              {t("workout.title")}
+            </h1>
+            <p className="text-xs text-muted-foreground">{t("workout.setupDesc")}</p>
+          </div>
+        </div>
+        <div className="px-5 pt-5">
         <div className="glass-card rounded-xl p-5 mb-5">
           <p className="text-sm font-semibold text-foreground mb-3">{t("workout.howManyDays")}</p>
           <div className="flex gap-2">
@@ -313,6 +320,7 @@ const WorkoutGenerator = () => {
             <Zap className="w-4 h-4 mr-2" />
             {t("workout.skipToAi")}
           </Button>
+        </div>
         </div>
       </div>
     );

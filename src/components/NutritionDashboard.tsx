@@ -8,6 +8,7 @@ import {
   Sparkles, Loader2, ChevronLeft, ChevronRight,
   Apple, Plus, Pencil, Trash2, Utensils, MoreVertical, RefreshCw, ArrowLeftRight, Target
 } from "lucide-react";
+import nutritionHero from "@/assets/nutrition-hero.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -346,15 +347,22 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
   };
 
   return (
-    <div className="px-5 pt-8 pb-28">
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-1">
-        <Apple className="w-5 h-5 text-primary" />
-        <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary">
-          {t("nutrition.title")}
-        </h1>
+    <div className="pb-28">
+      {/* Hero image */}
+      <div className="relative h-40 overflow-hidden">
+        <img src={nutritionHero} alt="Nutrition" className="w-full h-full object-cover" loading="lazy" width={1080} height={640} />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+        <div className="absolute bottom-4 left-5 right-5 flex items-center gap-2">
+          <Apple className="w-5 h-5 text-primary" />
+          <div>
+            <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary">
+              {t("nutrition.title")}
+            </h1>
+            <p className="text-xs text-muted-foreground">{t("nutrition.dailyTargets")}</p>
+          </div>
+        </div>
       </div>
-      <p className="text-sm text-muted-foreground mb-6">{t("nutrition.dailyTargets")}</p>
+      <div className="px-5 pt-5">
 
       {/* ═══ AI WEEKLY MEAL PLAN ═══ */}
       <div className="mb-8">
@@ -767,6 +775,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };
