@@ -41,7 +41,8 @@ interface WorkoutLog {
   logged_at: string;
 }
 
-type FlowStep = "questionnaire" | "photos" | "generating" | "plan";
+type FlowStep = "questionnaire" | "generating" | "plan";
+type QStep = 1 | 2 | 3 | 4 | 5 | 6;
 
 const FOCUS_OPTIONS = [
   { key: "chest", label: "Chest" },
