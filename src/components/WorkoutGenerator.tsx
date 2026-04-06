@@ -133,16 +133,23 @@ const WorkoutGenerator = () => {
     return logs[logs.length - 1].weight;
   };
 
-  const generatePlan = async () => {
+  const generatePlan = async (skipQ = false) => {
     setStep("generating");
     try {
       const { data, error } = await supabase.functions.invoke("generate-workout", {
         body: {
           daysPerWeek,
           focusAreas: selectedFocus.length > 0 ? selectedFocus : ["Full Body"],
-          equipment: images.length > 0 ? ["gym photos uploaded"] : [],
+          equipment: equipment.length > 0 ? equipment : (gymType === "full" ? ["full gym"] : []),
           language: lang,
           previousWeights: getPreviousWeights(),
+          // Send questionnaire data for better AI context
+          ...(skipQ ? {} : {
+            goal, age: parseInt(age) || undefined, weight: parseInt(weight as string) || undefined,
+            height: parseInt(height as string) || undefined, gender, bodyFat, expLevel,
+            sessionDuration: parseInt(sessionDuration) || 60, preferredTime,
+            gymType, hasInjury, injuryAreas, injuryDetails,
+          }),
         },
       });
 
