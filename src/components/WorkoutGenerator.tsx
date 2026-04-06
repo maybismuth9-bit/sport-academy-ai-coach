@@ -59,10 +59,26 @@ const WorkoutGenerator = () => {
 
   // Flow state
   const [step, setStep] = useState<FlowStep>("questionnaire");
+  const [qStep, setQStep] = useState<QStep>(1);
   const [daysPerWeek, setDaysPerWeek] = useState(3);
   const [selectedFocus, setSelectedFocus] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
-  const [skipPhotos, setSkipPhotos] = useState(false);
+
+  // Questionnaire data
+  const [goal, setGoal] = useState("");
+  const [age, setAge] = useState("");
+  const [weight, setWeight] = useState("");
+  const [height, setHeight] = useState("");
+  const [gender, setGender] = useState("");
+  const [bodyFat, setBodyFat] = useState("");
+  const [expLevel, setExpLevel] = useState("");
+  const [sessionDuration, setSessionDuration] = useState("60");
+  const [preferredTime, setPreferredTime] = useState("");
+  const [gymType, setGymType] = useState("");
+  const [equipment, setEquipment] = useState<string[]>([]);
+  const [hasInjury, setHasInjury] = useState(false);
+  const [injuryAreas, setInjuryAreas] = useState<string[]>([]);
+  const [injuryDetails, setInjuryDetails] = useState("");
 
   // Plan state
   const [plan, setPlan] = useState<DayPlan[] | null>(null);
