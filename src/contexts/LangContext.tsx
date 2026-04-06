@@ -228,12 +228,10 @@ const translations: Translations = {
   "wq.skipAi": { en: "Skip questionnaire — Generate with AI", he: "דלגו על השאלון — צרו עם AI", es: "Saltar cuestionario — Generar con IA", zh: "跳过问卷 — AI生成", ar: "تخطي الاستبيان — إنشاء بالذكاء", de: "Fragebogen überspringen — Mit KI generieren" },
 
   "wq.goalTitle": { en: "What is your training goal?", he: "מה המטרה שלך באימונים?", es: "¿Cuál es tu objetivo?", zh: "你的训练目标是什么？", ar: "ما هو هدفك التدريبي؟", de: "Was ist dein Trainingsziel?" },
-  "wq.goalMuscle": { en: "Build Muscle", he: "בניית שריר", es: "Ganar músculo", zh: "增肌", ar: "بناء العضلات", de: "Muskelaufbau" },
-  "wq.goalStrength": { en: "Gain Strength", he: "הגברת כוח", es: "Ganar fuerza", zh: "增强力量", ar: "زيادة القوة", de: "Kraft aufbauen" },
-  "wq.goalFatLoss": { en: "Fat Loss", he: "הורדת שומן", es: "Perder grasa", zh: "减脂", ar: "خسارة الدهون", de: "Fettabbau" },
-  "wq.goalTone": { en: "Toning & Definition", he: "חיטוב ועיצוב", es: "Tonificación", zh: "塑形", ar: "تنغيم وتحديد", de: "Straffen & Definieren" },
-  "wq.goalEndurance": { en: "Endurance", he: "סיבולת", es: "Resistencia", zh: "耐力", ar: "التحمل", de: "Ausdauer" },
-  "wq.goalGeneral": { en: "General Fitness", he: "כושר כללי", es: "Fitness general", zh: "一般健身", ar: "لياقة عامة", de: "Allgemeine Fitness" },
+  "wq.goalStrength": { en: "Strength Training", he: "אימוני כוח", es: "Entrenamiento de fuerza", zh: "力量训练", ar: "تدريب القوة", de: "Krafttraining" },
+  "wq.goalFunctional": { en: "Functional Training", he: "אימון פונקציונלי", es: "Entrenamiento funcional", zh: "功能性训练", ar: "تدريب وظيفي", de: "Funktionelles Training" },
+  "wq.goalAerobic": { en: "Aerobic Endurance", he: "סיבולת אירובית", es: "Resistencia aeróbica", zh: "有氧耐力", ar: "التحمل الهوائي", de: "Aerobe Ausdauer" },
+  "wq.goalCombined": { en: "All Combined", he: "הכל ביחד", es: "Todo combinado", zh: "全部结合", ar: "الكل معًا", de: "Alles kombiniert" },
 
   "wq.bodyTitle": { en: "Tell us about your body", he: "ספרו לנו על הגוף שלכם", es: "Cuéntanos sobre tu cuerpo", zh: "告诉我们你的身体情况", ar: "أخبرنا عن جسمك", de: "Erzähl uns von deinem Körper" },
   "wq.age": { en: "Age", he: "גיל", es: "Edad", zh: "年龄", ar: "العمر", de: "Alter" },
