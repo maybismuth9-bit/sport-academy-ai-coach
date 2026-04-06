@@ -55,12 +55,10 @@ const FOCUS_OPTIONS = [
 ];
 
 const GOAL_OPTIONS = [
-  { key: "muscle", label: "wq.goalMuscle" },
   { key: "strength", label: "wq.goalStrength" },
-  { key: "fatLoss", label: "wq.goalFatLoss" },
-  { key: "tone", label: "wq.goalTone" },
-  { key: "endurance", label: "wq.goalEndurance" },
-  { key: "general", label: "wq.goalGeneral" },
+  { key: "functional", label: "wq.goalFunctional" },
+  { key: "aerobic", label: "wq.goalAerobic" },
+  { key: "combined", label: "wq.goalCombined" },
 ];
 
 const EQUIP_OPTIONS = [
