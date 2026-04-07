@@ -3,6 +3,7 @@ import { useLang } from "@/contexts/LangContext";
 import { Zap, Shield, Brain, Dumbbell, Apple, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import gymHeroBg from "@/assets/gym-hero-bg.jpg";
+import fuelcoreLogo from "@/assets/fuelcore-logo.png";
 
 interface LandingPageProps {
   onGetStarted: () => void;
