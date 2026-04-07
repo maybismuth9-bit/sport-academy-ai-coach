@@ -97,7 +97,6 @@ const WorkoutGenerator = () => {
   const [preferredTime, setPreferredTime] = useState("");
   const [gymType, setGymType] = useState("");
   const [equipment, setEquipment] = useState<string[]>([]);
-  const [hasInjury, setHasInjury] = useState(false);
   const [injuryAreas, setInjuryAreas] = useState<string[]>([]);
   const [injuryDetails, setInjuryDetails] = useState("");
 
