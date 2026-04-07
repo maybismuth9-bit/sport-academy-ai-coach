@@ -3,6 +3,7 @@ import { useLang } from "@/contexts/LangContext";
 import { Zap, Shield, Brain, Dumbbell, Apple, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import gymHeroBg from "@/assets/gym-hero-bg.jpg";
+import fuelcoreLogo from "@/assets/fuelcore-logo.png";
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -41,9 +42,9 @@ const LandingPage = ({ onGetStarted }: LandingPageProps) => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
-            className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/30 to-accent/30 backdrop-blur-xl border border-primary/40 flex items-center justify-center mb-6 mx-auto shadow-[0_0_30px_hsl(180_80%_50%/0.3)]"
+            className="mb-6 mx-auto"
           >
-            <Shield className="w-10 h-10 text-primary drop-shadow-[0_0_12px_hsl(180_80%_50%/0.6)]" />
+            <img src={fuelcoreLogo} alt="FuelCore" className="w-32 h-32 object-contain drop-shadow-[0_0_30px_hsl(38_85%_55%/0.4)]" />
           </motion.div>
 
           <motion.h1
@@ -73,7 +74,7 @@ const LandingPage = ({ onGetStarted }: LandingPageProps) => {
             <Button
               onClick={onGetStarted}
               size="lg"
-              className="w-full h-14 text-lg font-display font-bold tracking-wide bg-cta-green hover:bg-cta-green/90 text-white rounded-xl shadow-[0_0_40px_hsl(145_70%_40%/0.5)] transition-all hover:shadow-[0_0_60px_hsl(145_70%_40%/0.6)] hover:scale-[1.02]"
+              className="w-full h-14 text-lg font-display font-bold tracking-wide bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-[0_0_40px_hsl(38_85%_55%/0.5)] transition-all hover:shadow-[0_0_60px_hsl(38_85%_55%/0.6)] hover:scale-[1.02]"
             >
               <Zap className="w-5 h-5 mr-2" />
               {t("landing.cta")}

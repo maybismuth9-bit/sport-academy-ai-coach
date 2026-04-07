@@ -42,7 +42,7 @@ interface WorkoutLog {
 }
 
 type FlowStep = "questionnaire" | "generating" | "plan";
-type QStep = 1 | 2 | 3 | 4 | 5 | 6;
+type QStep = 1 | 2 | 3 | 4 | 5;
 
 const FOCUS_OPTIONS = [
   { key: "chest", label: "Chest" },
@@ -61,17 +61,6 @@ const GOAL_OPTIONS = [
   { key: "combined", label: "wq.goalCombined" },
 ];
 
-const EQUIP_OPTIONS = [
-  { key: "Barbell", label: "wq.equipBarbell" },
-  { key: "Dumbbells", label: "wq.equipDumbbells" },
-  { key: "Cable Machine", label: "wq.equipCables" },
-  { key: "Smith Machine", label: "wq.equipSmith" },
-  { key: "Bench", label: "wq.equipBench" },
-  { key: "Pull-up Bar", label: "wq.equipPullup" },
-  { key: "Kettlebell", label: "wq.equipKettlebell" },
-  { key: "Resistance Bands", label: "wq.equipBands" },
-  { key: "Weight Machines", label: "wq.equipMachines" },
-];
 
 const INJURY_OPTIONS = [
   { key: "shoulder", label: "wq.injuryShoulder" },
@@ -84,7 +73,7 @@ const INJURY_OPTIONS = [
   { key: "other", label: "wq.injuryOther" },
 ];
 
-const TOTAL_Q_STEPS = 6;
+const TOTAL_Q_STEPS = 5;
 
 const WorkoutGenerator = () => {
   const { t, lang } = useLang();
@@ -294,9 +283,8 @@ const WorkoutGenerator = () => {
   const toggleFocus = (key: string) => {
     setSelectedFocus(prev => prev.includes(key) ? prev.filter(f => f !== key) : [...prev, key]);
   };
-  const toggleEquip = (key: string) => {
-    setEquipment(prev => prev.includes(key) ? prev.filter(f => f !== key) : [...prev, key]);
-  };
+
+
   const toggleInjuryArea = (key: string) => {
     setInjuryAreas(prev => prev.includes(key) ? prev.filter(f => f !== key) : [...prev, key]);
   };
@@ -474,53 +462,9 @@ const WorkoutGenerator = () => {
               </motion.div>
             )}
 
-            {/* Step 4: Equipment */}
+            {/* Step 4: Injuries */}
             {qStep === 4 && (
               <motion.div key="q4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <div className="glass-card rounded-xl p-5 mb-5">
-                  <p className="text-sm font-semibold text-foreground mb-4">{t("wq.equipTitle")}</p>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-xs text-muted-foreground mb-2 block">{t("wq.gymType")}</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {[
-                          { key: "full", label: "wq.gymFull" },
-                          { key: "home", label: "wq.gymHome" },
-                          { key: "minimal", label: "wq.gymMinimal" },
-                          { key: "bodyweight", label: "wq.gymBodyweight" },
-                        ].map(opt => (
-                          <button key={opt.key} onClick={() => setGymType(opt.key)}
-                            className={`py-2.5 px-2 rounded-lg text-xs font-display font-semibold transition-all ${
-                              gymType === opt.key ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
-                            }`}>
-                            {t(opt.label)}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    {gymType && gymType !== "bodyweight" && (
-                      <div>
-                        <label className="text-xs text-muted-foreground mb-2 block">{t("wq.availableEquip")}</label>
-                        <div className="flex flex-wrap gap-2">
-                          {EQUIP_OPTIONS.map(opt => (
-                            <button key={opt.key} onClick={() => toggleEquip(opt.key)}
-                              className={`px-3 py-2 rounded-full text-xs font-display font-semibold transition-all ${
-                                equipment.includes(opt.key) ? "bg-cta-orange text-black" : "bg-secondary text-muted-foreground"
-                              }`}>
-                              {t(opt.label)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Step 5: Injuries */}
-            {qStep === 5 && (
-              <motion.div key="q5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <div className="glass-card rounded-xl p-5 mb-5">
                   <p className="text-sm font-semibold text-foreground mb-4">{t("wq.injuryTitle")}</p>
                   <div className="space-y-4">
@@ -561,8 +505,8 @@ const WorkoutGenerator = () => {
               </motion.div>
             )}
 
-            {/* Step 6: Photo/Video Upload */}
-            {qStep === 6 && (
+            {/* Step 5: Photo/Video Upload */}
+            {qStep === 5 && (
               <motion.div key="q6" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <div className="glass-card rounded-xl p-5 mb-5">
                   <p className="text-sm font-semibold text-foreground mb-2">{t("wq.photoTitle")}</p>

@@ -188,7 +188,7 @@ const AcademyPage = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 mb-2">
                       <span className={`text-[10px] font-display font-semibold tracking-widest uppercase px-2 py-0.5 rounded-full ${categoryColorMap[article.category] || "bg-primary/10 text-primary"}`}>
-                        {article.category}
+                        {t(`academy.cat.${article.category}`)}
                       </span>
                       <span className="text-[10px] text-muted-foreground">{formatDate(article.created_at)}</span>
                     </div>
