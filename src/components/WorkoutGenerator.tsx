@@ -61,17 +61,6 @@ const GOAL_OPTIONS = [
   { key: "combined", label: "wq.goalCombined" },
 ];
 
-const EQUIP_OPTIONS = [
-  { key: "Barbell", label: "wq.equipBarbell" },
-  { key: "Dumbbells", label: "wq.equipDumbbells" },
-  { key: "Cable Machine", label: "wq.equipCables" },
-  { key: "Smith Machine", label: "wq.equipSmith" },
-  { key: "Bench", label: "wq.equipBench" },
-  { key: "Pull-up Bar", label: "wq.equipPullup" },
-  { key: "Kettlebell", label: "wq.equipKettlebell" },
-  { key: "Resistance Bands", label: "wq.equipBands" },
-  { key: "Weight Machines", label: "wq.equipMachines" },
-];
 
 const INJURY_OPTIONS = [
   { key: "shoulder", label: "wq.injuryShoulder" },
