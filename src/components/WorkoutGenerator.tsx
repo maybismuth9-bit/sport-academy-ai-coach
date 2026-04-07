@@ -283,9 +283,8 @@ const WorkoutGenerator = () => {
   const toggleFocus = (key: string) => {
     setSelectedFocus(prev => prev.includes(key) ? prev.filter(f => f !== key) : [...prev, key]);
   };
-  const toggleEquip = (key: string) => {
-    setEquipment(prev => prev.includes(key) ? prev.filter(f => f !== key) : [...prev, key]);
-  };
+
+
   const toggleInjuryArea = (key: string) => {
     setInjuryAreas(prev => prev.includes(key) ? prev.filter(f => f !== key) : [...prev, key]);
   };
