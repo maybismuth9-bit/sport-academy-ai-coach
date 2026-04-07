@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, ExternalLink, ChevronDown, Sparkles, Loader2, RefreshCw } from "lucide-react";
+import academyHero from "@/assets/academy-hero.jpg";
 import { useLang } from "@/contexts/LangContext";
 import { supabase } from "@/integrations/supabase/client";
 
