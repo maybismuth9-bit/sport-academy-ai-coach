@@ -492,6 +492,15 @@ const translations: Translations = {
   "weeklyPhoto.desc": { en: "It's time to take your weekly progress photo! Track your transformation.", he: "הגיע הזמן לתמונת ההתקדמות השבועית! עקבו אחר השינוי.", es: "¡Es hora de tu foto semanal! Sigue tu transformación.", zh: "是时候拍摄每周进步照片了！追踪你的变化。", ar: "حان وقت صورة التقدم الأسبوعية! تتبع تحولك.", de: "Zeit für dein wöchentliches Fortschrittsfoto!" },
   "weeklyPhoto.goToProgress": { en: "Go to Progress", he: "לעמוד התקדמות", es: "Ir a Progreso", zh: "前往进步页面", ar: "اذهب للتقدم", de: "Zum Fortschritt" },
   "weeklyPhoto.later": { en: "Later", he: "מאוחר יותר", es: "Más tarde", zh: "稍后", ar: "لاحقاً", de: "Später" },
+
+  // Academy categories
+  "academy.cat.Strength": { en: "Strength", he: "כוח", es: "Fuerza", zh: "力量", ar: "القوة", de: "Kraft" },
+  "academy.cat.Nutrition": { en: "Nutrition", he: "תזונה", es: "Nutrición", zh: "营养", ar: "التغذية", de: "Ernährung" },
+  "academy.cat.Recovery": { en: "Recovery", he: "התאוששות", es: "Recuperación", zh: "恢复", ar: "التعافي", de: "Erholung" },
+  "academy.cat.Physiology": { en: "Physiology", he: "פיזיולוגיה", es: "Fisiología", zh: "生理学", ar: "علم وظائف الأعضاء", de: "Physiologie" },
+  "academy.cat.Performance": { en: "Performance", he: "ביצועים", es: "Rendimiento", zh: "表现", ar: "الأداء", de: "Leistung" },
+  "academy.cat.Science": { en: "Science", he: "מדע", es: "Ciencia", zh: "科学", ar: "العلوم", de: "Wissenschaft" },
+  "academy.cat.General": { en: "General", he: "כללי", es: "General", zh: "综合", ar: "عام", de: "Allgemein" },
 };
 
 interface LangContextType {
