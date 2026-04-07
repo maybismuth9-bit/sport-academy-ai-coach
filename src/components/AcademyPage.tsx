@@ -148,14 +148,22 @@ const AcademyPage = () => {
   };
 
   return (
-    <div className="px-5 pt-8 pb-28">
-      <div className="flex items-center gap-2 mb-1">
-        <BookOpen className="w-5 h-5 text-primary" />
-        <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary">
-          {t("academy.title")}
-        </h1>
+    <div className="pb-28">
+      <div className="relative h-40 overflow-hidden">
+        <img src={academyHero} alt="Academy" className="w-full h-full object-cover" width={1080} height={640} />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+        <div className="absolute bottom-4 left-5 right-5">
+          <div className="flex items-center gap-2 mb-1">
+            <BookOpen className="w-5 h-5 text-primary" />
+            <h1 className="text-lg font-display font-bold tracking-wider neon-text text-primary">
+              {t("academy.title")}
+            </h1>
+          </div>
+          <p className="text-xs text-muted-foreground">{t("academy.subtitle")}</p>
+        </div>
       </div>
-      <p className="text-sm text-muted-foreground mb-4">{t("academy.subtitle")}</p>
+
+      <div className="px-5 pt-5">
 
       <div className="flex items-center gap-2 mb-5 glass-card rounded-xl p-3">
         <Sparkles className="w-4 h-4 text-cta-orange flex-shrink-0" />
