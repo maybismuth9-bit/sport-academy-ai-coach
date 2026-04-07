@@ -73,7 +73,7 @@ const INJURY_OPTIONS = [
   { key: "other", label: "wq.injuryOther" },
 ];
 
-const TOTAL_Q_STEPS = 6;
+const TOTAL_Q_STEPS = 5;
 
 const WorkoutGenerator = () => {
   const { t, lang } = useLang();
