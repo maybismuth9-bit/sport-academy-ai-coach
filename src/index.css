@@ -71,7 +71,7 @@
 
 @layer utilities {
   .neon-text {
-    text-shadow: 0 0 10px hsl(180 80% 50% / 0.6), 0 0 40px hsl(180 80% 50% / 0.2);
+    text-shadow: 0 0 10px hsl(38 85% 55% / 0.6), 0 0 40px hsl(38 85% 55% / 0.2);
   }
 
   .neon-border {
@@ -79,7 +79,7 @@
   }
 
   .violet-text {
-    text-shadow: 0 0 10px hsl(270 60% 60% / 0.6), 0 0 40px hsl(270 60% 60% / 0.2);
+    text-shadow: 0 0 10px hsl(25 90% 50% / 0.6), 0 0 40px hsl(25 90% 50% / 0.2);
   }
 
   .glass-card {
