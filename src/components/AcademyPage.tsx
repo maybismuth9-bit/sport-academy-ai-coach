@@ -261,6 +261,7 @@ const AcademyPage = () => {
           })}
         </div>
       )}
+      </div>
     </div>
   );
 };
