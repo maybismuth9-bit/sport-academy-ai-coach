@@ -42,7 +42,7 @@ interface WorkoutLog {
 }
 
 type FlowStep = "questionnaire" | "generating" | "plan";
-type QStep = 1 | 2 | 3 | 4 | 5 | 6;
+type QStep = 1 | 2 | 3 | 4 | 5;
 
 const FOCUS_OPTIONS = [
   { key: "chest", label: "Chest" },
