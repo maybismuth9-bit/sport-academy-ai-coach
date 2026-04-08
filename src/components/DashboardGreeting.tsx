@@ -2,11 +2,14 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/contexts/LangContext";
 import { motion } from "framer-motion";
+import { getNutritionWeeklyPercent, getStoredNutritionPlan, getWorkoutWeeklyPercent } from "@/lib/weeklyTracking";
 
 const DashboardGreeting = () => {
   const { t } = useLang();
   const [firstName, setFirstName] = useState("");
   const [completionPercent, setCompletionPercent] = useState(0);
+  const [workoutPercent, setWorkoutPercent] = useState(0);
+  const [nutritionPercent, setNutritionPercent] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,16 +25,15 @@ const DashboardGreeting = () => {
 
       setFirstName(profile?.first_name || user.email?.split("@")[0] || "");
 
-      // Calculate daily completion based on meals logged today
-      const today = new Date().toISOString().split("T")[0];
-      const { count } = await supabase
-        .from("user_nutrition")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .gte("created_at", today);
-      
-      const percent = Math.min(100, Math.round(((count || 0) / 4) * 100));
-      setCompletionPercent(percent);
+      const workoutPlan = JSON.parse(localStorage.getItem("fuelcore_workout_plan") || "[]") as unknown[];
+      const hasNutritionPlan = !!getStoredNutritionPlan()?.length;
+      const nextWorkoutPercent = getWorkoutWeeklyPercent(workoutPlan.length);
+      const nextNutritionPercent = getNutritionWeeklyPercent();
+      const active = [workoutPlan.length > 0, hasNutritionPlan].filter(Boolean).length;
+
+      setWorkoutPercent(nextWorkoutPercent);
+      setNutritionPercent(nextNutritionPercent);
+      setCompletionPercent(active > 0 ? Math.round((nextWorkoutPercent + nextNutritionPercent) / active) : 0);
     };
     fetchData();
   }, []);
@@ -77,7 +79,27 @@ const DashboardGreeting = () => {
         <h2 className="text-xl font-display font-bold text-foreground capitalize">
           {firstName || "..."}
         </h2>
-        <p className="text-xs text-muted-foreground mt-1">{t("dashboard.completion")}</p>
+        <p className="text-xs text-muted-foreground mt-1">{t("dashboard.weeklyCompletion")}</p>
+        <div className="mt-3 w-full max-w-[180px] space-y-2">
+          <div>
+            <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
+              <span>{t("dashboard.workoutWeekly")}</span>
+              <span>{workoutPercent}%</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+              <div className="h-full rounded-full bg-primary" style={{ width: `${workoutPercent}%` }} />
+            </div>
+          </div>
+          <div>
+            <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
+              <span>{t("dashboard.nutritionWeekly")}</span>
+              <span>{nutritionPercent}%</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+              <div className="h-full rounded-full bg-cta-green" style={{ width: `${nutritionPercent}%` }} />
+            </div>
+          </div>
+        </div>
       </div>
     </motion.div>
   );
