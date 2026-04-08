@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import physioHero from "@/assets/physio-hero.jpg";
+import SectionDisclaimer from "@/components/SectionDisclaimer";
 
 interface Exercise {
   name: string;
@@ -208,6 +209,8 @@ const PhysioPage = () => {
             <RotateCcw className="w-4 h-4 mr-2" />
             {t("physio.newDiagnosis")}
           </Button>
+
+          <SectionDisclaimer page="physio" />
         </div>
       </div>
     );
@@ -290,6 +293,8 @@ const PhysioPage = () => {
           <Activity className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
           <p className="text-[10px] text-muted-foreground leading-relaxed">{t("physio.disclaimer")}</p>
         </div>
+
+        <SectionDisclaimer page="physio" className="mt-1" />
       </div>
     </div>
   );
