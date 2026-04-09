@@ -6,8 +6,13 @@ import { toast } from "@/hooks/use-toast";
 import { NutritionPlan, AssessmentData } from "@/components/AssessmentForm";
 import {
   Sparkles, Loader2, ChevronLeft, ChevronRight,
-  Apple, Plus, Pencil, Trash2, Utensils, MoreVertical, RefreshCw, ArrowLeftRight, Target
+  Apple, Plus, Pencil, Trash2, Utensils, MoreVertical, RefreshCw, ArrowLeftRight, Target, CheckSquare, Square
 } from "lucide-react";
+import {
+  getNutritionCompletionState, saveNutritionCompletionState,
+  isNutritionMealCompleted, updateNutritionMealCompletion,
+  saveStoredNutritionPlan,
+} from "@/lib/weeklyTracking";
 import nutritionHero from "@/assets/nutrition-hero.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
