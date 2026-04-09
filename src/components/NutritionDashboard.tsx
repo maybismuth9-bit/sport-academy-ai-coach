@@ -158,6 +158,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
       if (error) throw error;
       if (data?.plan?.days) {
         setAiMealPlan(data.plan.days);
+        saveStoredNutritionPlan(data.plan.days);
         setSelectedDayIdx(0);
         await supabase.from("ai_meal_plans").insert({
           user_id: user.id,
