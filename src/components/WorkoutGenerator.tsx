@@ -2,8 +2,13 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload, Camera, Dumbbell, Zap, Edit3, Save, BarChart3, TrendingUp,
-  Trash2, RefreshCw, ChevronUp, ChevronDown, Loader2, CheckCircle2, ArrowRight, Info, MoreVertical
+  Trash2, RefreshCw, ChevronUp, ChevronDown, Loader2, CheckCircle2, ArrowRight, Info, MoreVertical, Check, Square, CheckSquare
 } from "lucide-react";
+import {
+  getWorkoutCompletionState, saveWorkoutCompletionState,
+  isExerciseCompleted, isWorkoutCompleted,
+  updateExerciseCompletion, updateWorkoutCompletion,
+} from "@/lib/weeklyTracking";
 import workoutHero from "@/assets/workout-hero.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,6 +110,27 @@ const WorkoutGenerator = () => {
   const [plan, setPlan] = useState<DayPlan[] | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
   const [replacingExercise, setReplacingExercise] = useState<string | null>(null);
+
+  // Completion tracking
+  const [completionState, setCompletionState] = useState(getWorkoutCompletionState());
+
+  const toggleExerciseComplete = (dayIdx: number, exerciseName: string) => {
+    if (!plan) return;
+    const allNames = plan[dayIdx].exercises.map(e => e.name);
+    const current = isExerciseCompleted(completionState, dayIdx, exerciseName);
+    const next = updateExerciseCompletion(completionState, dayIdx, exerciseName, allNames, !current);
+    setCompletionState(next);
+    saveWorkoutCompletionState(next);
+  };
+
+  const toggleDayComplete = (dayIdx: number) => {
+    if (!plan) return;
+    const allNames = plan[dayIdx].exercises.map(e => e.name);
+    const current = isWorkoutCompleted(completionState, dayIdx);
+    const next = updateWorkoutCompletion(completionState, dayIdx, allNames, !current);
+    setCompletionState(next);
+    saveWorkoutCompletionState(next);
+  };
 
   // Tracking state
   const [editingExercise, setEditingExercise] = useState<string | null>(null);
