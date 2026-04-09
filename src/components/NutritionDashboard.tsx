@@ -113,7 +113,10 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
       .limit(1);
     if (data && data.length > 0 && (data[0] as any).plan_data) {
       const planData = (data[0] as any).plan_data;
-      if (planData.days) setAiMealPlan(planData.days);
+      if (planData.days) {
+        setAiMealPlan(planData.days);
+        saveStoredNutritionPlan(planData.days);
+      }
     }
   };
 
