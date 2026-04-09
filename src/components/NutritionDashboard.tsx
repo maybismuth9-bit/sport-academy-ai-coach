@@ -87,6 +87,16 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
   const [form, setForm] = useState({ food_name: "", calories: "", protein: "", meal_time: "Breakfast" });
   const [saving, setSaving] = useState(false);
 
+  // Completion tracking
+  const [nutritionCompletion, setNutritionCompletion] = useState(getNutritionCompletionState());
+
+  const toggleMealComplete = (dayIdx: number, mealIdx: number, mealCount: number) => {
+    const current = isNutritionMealCompleted(nutritionCompletion, dayIdx, mealIdx);
+    const next = updateNutritionMealCompletion(nutritionCompletion, dayIdx, mealIdx, mealCount, !current);
+    setNutritionCompletion(next);
+    saveNutritionCompletionState(next);
+  };
+
   useEffect(() => {
     loadSavedPlan();
     fetchManualMeals();
