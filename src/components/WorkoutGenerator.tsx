@@ -690,26 +690,45 @@ const WorkoutGenerator = () => {
       {/* Day Selector */}
       {plan && (
         <div className="flex gap-1.5 mb-6 overflow-x-auto pb-2">
-          {plan.map((d, i) => (
-            <button
-              key={i}
-              onClick={() => setSelectedDay(i)}
-              className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-display font-semibold tracking-wider transition-all duration-300 ${
-                selectedDay === i
-                  ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(180_80%_50%/0.4)]"
-                  : "bg-secondary text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
+          {plan.map((d, i) => {
+            const dayDone = isWorkoutCompleted(completionState, i);
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedDay(i)}
+                className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-display font-semibold tracking-wider transition-all duration-300 relative ${
+                  selectedDay === i
+                    ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(180_80%_50%/0.4)]"
+                    : dayDone
+                      ? "bg-cta-green/20 text-cta-green border border-cta-green/30"
+                      : "bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {dayDone && <Check className="w-3 h-3 inline mr-1" />}
+                {d.label}
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {/* Day Focus */}
+      {/* Day Focus + Mark Complete */}
       {currentDay && (
-        <div className="glass-card rounded-xl p-4 mb-5">
+        <div className="glass-card rounded-xl p-4 mb-5 flex items-center justify-between">
           <p className="text-sm font-semibold text-foreground">{currentDay.focus}</p>
+          <button
+            onClick={() => toggleDayComplete(selectedDay)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-display font-semibold tracking-wider transition-all ${
+              isWorkoutCompleted(completionState, selectedDay)
+                ? "bg-cta-green text-black"
+                : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+            }`}
+          >
+            {isWorkoutCompleted(completionState, selectedDay)
+              ? <><CheckSquare className="w-3.5 h-3.5" /> {t("workout.completed")}</>
+              : <><Square className="w-3.5 h-3.5" /> {t("workout.markDone")}</>
+            }
+          </button>
         </div>
       )}
 
