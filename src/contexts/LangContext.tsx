@@ -218,6 +218,9 @@ const translations: Translations = {
   "workout.weightKg": { en: "Weight (kg)", he: 'משקל (ק"ג)', es: "Peso (kg)", zh: "重量(kg)", ar: "الوزن (كغ)", de: "Gewicht (kg)" },
   "workout.showGraph": { en: "Show Performance Graph", he: "הציגו גרף ביצועים", es: "Mostrar gráfico", zh: "显示表现图表", ar: "عرض رسم الأداء", de: "Leistungsgraph anzeigen" },
   "workout.hideGraph": { en: "Hide Performance Graph", he: "הסתירו גרף ביצועים", es: "Ocultar gráfico", zh: "隐藏表现图表", ar: "إخفاء رسم الأداء", de: "Leistungsgraph ausblenden" },
+  "workout.completed": { en: "Completed", he: "בוצע", es: "Completado", zh: "已完成", ar: "مكتمل", de: "Erledigt" },
+  "workout.markDone": { en: "Mark Done", he: "סמן כבוצע", es: "Marcar hecho", zh: "标记完成", ar: "تحديد كمكتمل", de: "Als erledigt markieren" },
+  "nutrition.mealDone": { en: "Done", he: "בוצע", es: "Hecho", zh: "完成", ar: "تم", de: "Erledigt" },
 
   // Workout Questionnaire
   "wq.step": { en: "Step", he: "שלב", es: "Paso", zh: "步骤", ar: "خطوة", de: "Schritt" },

@@ -2,8 +2,13 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload, Camera, Dumbbell, Zap, Edit3, Save, BarChart3, TrendingUp,
-  Trash2, RefreshCw, ChevronUp, ChevronDown, Loader2, CheckCircle2, ArrowRight, Info, MoreVertical
+  Trash2, RefreshCw, ChevronUp, ChevronDown, Loader2, CheckCircle2, ArrowRight, Info, MoreVertical, Check, Square, CheckSquare
 } from "lucide-react";
+import {
+  getWorkoutCompletionState, saveWorkoutCompletionState,
+  isExerciseCompleted, isWorkoutCompleted,
+  updateExerciseCompletion, updateWorkoutCompletion,
+} from "@/lib/weeklyTracking";
 import workoutHero from "@/assets/workout-hero.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,6 +110,27 @@ const WorkoutGenerator = () => {
   const [plan, setPlan] = useState<DayPlan[] | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
   const [replacingExercise, setReplacingExercise] = useState<string | null>(null);
+
+  // Completion tracking
+  const [completionState, setCompletionState] = useState(getWorkoutCompletionState());
+
+  const toggleExerciseComplete = (dayIdx: number, exerciseName: string) => {
+    if (!plan) return;
+    const allNames = plan[dayIdx].exercises.map(e => e.name);
+    const current = isExerciseCompleted(completionState, dayIdx, exerciseName);
+    const next = updateExerciseCompletion(completionState, dayIdx, exerciseName, allNames, !current);
+    setCompletionState(next);
+    saveWorkoutCompletionState(next);
+  };
+
+  const toggleDayComplete = (dayIdx: number) => {
+    if (!plan) return;
+    const allNames = plan[dayIdx].exercises.map(e => e.name);
+    const current = isWorkoutCompleted(completionState, dayIdx);
+    const next = updateWorkoutCompletion(completionState, dayIdx, allNames, !current);
+    setCompletionState(next);
+    saveWorkoutCompletionState(next);
+  };
 
   // Tracking state
   const [editingExercise, setEditingExercise] = useState<string | null>(null);
@@ -664,26 +690,45 @@ const WorkoutGenerator = () => {
       {/* Day Selector */}
       {plan && (
         <div className="flex gap-1.5 mb-6 overflow-x-auto pb-2">
-          {plan.map((d, i) => (
-            <button
-              key={i}
-              onClick={() => setSelectedDay(i)}
-              className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-display font-semibold tracking-wider transition-all duration-300 ${
-                selectedDay === i
-                  ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(180_80%_50%/0.4)]"
-                  : "bg-secondary text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
+          {plan.map((d, i) => {
+            const dayDone = isWorkoutCompleted(completionState, i);
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedDay(i)}
+                className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-display font-semibold tracking-wider transition-all duration-300 relative ${
+                  selectedDay === i
+                    ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(180_80%_50%/0.4)]"
+                    : dayDone
+                      ? "bg-cta-green/20 text-cta-green border border-cta-green/30"
+                      : "bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {dayDone && <Check className="w-3 h-3 inline mr-1" />}
+                {d.label}
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {/* Day Focus */}
+      {/* Day Focus + Mark Complete */}
       {currentDay && (
-        <div className="glass-card rounded-xl p-4 mb-5">
+        <div className="glass-card rounded-xl p-4 mb-5 flex items-center justify-between">
           <p className="text-sm font-semibold text-foreground">{currentDay.focus}</p>
+          <button
+            onClick={() => toggleDayComplete(selectedDay)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-display font-semibold tracking-wider transition-all ${
+              isWorkoutCompleted(completionState, selectedDay)
+                ? "bg-cta-green text-black"
+                : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+            }`}
+          >
+            {isWorkoutCompleted(completionState, selectedDay)
+              ? <><CheckSquare className="w-3.5 h-3.5" /> {t("workout.completed")}</>
+              : <><Square className="w-3.5 h-3.5" /> {t("workout.markDone")}</>
+            }
+          </button>
         </div>
       )}
 
@@ -693,6 +738,7 @@ const WorkoutGenerator = () => {
           {currentDay.exercises.map((ex, i) => {
             const lastWeight = getLastWeight(ex.name);
             const isReplacing = replacingExercise === ex.name;
+            const exDone = isExerciseCompleted(completionState, selectedDay, ex.name);
 
             return (
               <motion.div
@@ -700,7 +746,7 @@ const WorkoutGenerator = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
-                className="glass-card rounded-xl overflow-hidden"
+                className={`glass-card rounded-xl overflow-hidden transition-all ${exDone ? "border border-cta-green/30 bg-cta-green/5" : ""}`}
               >
                 {isReplacing ? (
                   <div className="p-4 flex items-center gap-3">
@@ -711,9 +757,17 @@ const WorkoutGenerator = () => {
                   <>
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <p className="font-semibold text-foreground text-sm">{ex.name}</p>
-                          <p className="text-xs text-muted-foreground">{ex.muscle}</p>
+                        <div className="flex items-start gap-2.5 flex-1">
+                          <button
+                            onClick={() => toggleExerciseComplete(selectedDay, ex.name)}
+                            className={`mt-0.5 flex-shrink-0 transition-colors ${exDone ? "text-cta-green" : "text-muted-foreground hover:text-foreground"}`}
+                          >
+                            {exDone ? <CheckSquare className="w-4.5 h-4.5" /> : <Square className="w-4.5 h-4.5" />}
+                          </button>
+                          <div className="flex-1">
+                            <p className={`font-semibold text-sm ${exDone ? "text-cta-green line-through opacity-70" : "text-foreground"}`}>{ex.name}</p>
+                            <p className="text-xs text-muted-foreground">{ex.muscle}</p>
+                          </div>
                         </div>
                         <div className="flex items-center gap-1">
                           <button onClick={() => setExpandedExercise(expandedExercise === ex.name ? null : ex.name)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors" title={t("workout.exerciseInfo")}>

@@ -6,8 +6,13 @@ import { toast } from "@/hooks/use-toast";
 import { NutritionPlan, AssessmentData } from "@/components/AssessmentForm";
 import {
   Sparkles, Loader2, ChevronLeft, ChevronRight,
-  Apple, Plus, Pencil, Trash2, Utensils, MoreVertical, RefreshCw, ArrowLeftRight, Target
+  Apple, Plus, Pencil, Trash2, Utensils, MoreVertical, RefreshCw, ArrowLeftRight, Target, CheckSquare, Square
 } from "lucide-react";
+import {
+  getNutritionCompletionState, saveNutritionCompletionState,
+  isNutritionMealCompleted, updateNutritionMealCompletion,
+  saveStoredNutritionPlan,
+} from "@/lib/weeklyTracking";
 import nutritionHero from "@/assets/nutrition-hero.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,6 +87,16 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
   const [form, setForm] = useState({ food_name: "", calories: "", protein: "", meal_time: "Breakfast" });
   const [saving, setSaving] = useState(false);
 
+  // Completion tracking
+  const [nutritionCompletion, setNutritionCompletion] = useState(getNutritionCompletionState());
+
+  const toggleMealComplete = (dayIdx: number, mealIdx: number, mealCount: number) => {
+    const current = isNutritionMealCompleted(nutritionCompletion, dayIdx, mealIdx);
+    const next = updateNutritionMealCompletion(nutritionCompletion, dayIdx, mealIdx, mealCount, !current);
+    setNutritionCompletion(next);
+    saveNutritionCompletionState(next);
+  };
+
   useEffect(() => {
     loadSavedPlan();
     fetchManualMeals();
@@ -98,7 +113,10 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
       .limit(1);
     if (data && data.length > 0 && (data[0] as any).plan_data) {
       const planData = (data[0] as any).plan_data;
-      if (planData.days) setAiMealPlan(planData.days);
+      if (planData.days) {
+        setAiMealPlan(planData.days);
+        saveStoredNutritionPlan(planData.days);
+      }
     }
   };
 
@@ -143,6 +161,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
       if (error) throw error;
       if (data?.plan?.days) {
         setAiMealPlan(data.plan.days);
+        saveStoredNutritionPlan(data.plan.days);
         setSelectedDayIdx(0);
         await supabase.from("ai_meal_plans").insert({
           user_id: user.id,
@@ -499,6 +518,7 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
                     const mealCals = meal.items.reduce((s, it) => s + it.calories, 0);
                     const mealProtein = meal.items.reduce((s, it) => s + (it.protein || 0), 0);
                     const isMealSwapping = swappingKey === `meal-${selectedDayIdx}-${mealIdx}`;
+                    const mealDone = isNutritionMealCompleted(nutritionCompletion, selectedDayIdx, mealIdx);
 
                     return (
                       <motion.div
@@ -506,12 +526,20 @@ const NutritionDashboard = ({ plan, assessmentData }: NutritionDashboardProps) =
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: mealIdx * 0.08 }}
-                        className="glass-card rounded-xl p-3 overflow-hidden"
+                        className={`glass-card rounded-xl p-3 overflow-hidden transition-all ${mealDone ? "border border-cta-green/30 bg-cta-green/5" : ""}`}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <span className={`text-[10px] font-display font-bold tracking-wider uppercase px-2 py-0.5 rounded-full border ${colorClass}`}>
-                            {meal.mealName}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => toggleMealComplete(selectedDayIdx, mealIdx, currentAiDay.meals.length)}
+                              className={`flex-shrink-0 transition-colors ${mealDone ? "text-cta-green" : "text-muted-foreground hover:text-foreground"}`}
+                            >
+                              {mealDone ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                            </button>
+                            <span className={`text-[10px] font-display font-bold tracking-wider uppercase px-2 py-0.5 rounded-full border ${colorClass} ${mealDone ? "opacity-60 line-through" : ""}`}>
+                              {meal.mealName}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-1.5">
                             <span className="text-[10px] text-muted-foreground font-mono">
                               {mealCals} {t("nutrition.kcal")} • {Math.round(mealProtein)}g
