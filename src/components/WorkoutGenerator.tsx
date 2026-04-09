@@ -738,6 +738,7 @@ const WorkoutGenerator = () => {
           {currentDay.exercises.map((ex, i) => {
             const lastWeight = getLastWeight(ex.name);
             const isReplacing = replacingExercise === ex.name;
+            const exDone = isExerciseCompleted(completionState, selectedDay, ex.name);
 
             return (
               <motion.div
@@ -745,7 +746,7 @@ const WorkoutGenerator = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
-                className="glass-card rounded-xl overflow-hidden"
+                className={`glass-card rounded-xl overflow-hidden transition-all ${exDone ? "border border-cta-green/30 bg-cta-green/5" : ""}`}
               >
                 {isReplacing ? (
                   <div className="p-4 flex items-center gap-3">
@@ -756,9 +757,17 @@ const WorkoutGenerator = () => {
                   <>
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <p className="font-semibold text-foreground text-sm">{ex.name}</p>
-                          <p className="text-xs text-muted-foreground">{ex.muscle}</p>
+                        <div className="flex items-start gap-2.5 flex-1">
+                          <button
+                            onClick={() => toggleExerciseComplete(selectedDay, ex.name)}
+                            className={`mt-0.5 flex-shrink-0 transition-colors ${exDone ? "text-cta-green" : "text-muted-foreground hover:text-foreground"}`}
+                          >
+                            {exDone ? <CheckSquare className="w-4.5 h-4.5" /> : <Square className="w-4.5 h-4.5" />}
+                          </button>
+                          <div className="flex-1">
+                            <p className={`font-semibold text-sm ${exDone ? "text-cta-green line-through opacity-70" : "text-foreground"}`}>{ex.name}</p>
+                            <p className="text-xs text-muted-foreground">{ex.muscle}</p>
+                          </div>
                         </div>
                         <div className="flex items-center gap-1">
                           <button onClick={() => setExpandedExercise(expandedExercise === ex.name ? null : ex.name)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors" title={t("workout.exerciseInfo")}>
